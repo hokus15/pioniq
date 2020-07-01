@@ -1,0 +1,14 @@
+{
+    "mqtt": {
+        "broker" : "broker_address",
+        "port" : 8883,
+        "user" : "user",
+        "password" : "password",
+        "topic_prefix" : "topic"
+    },
+    "service": {
+        "sleep": 15,
+        "min_accuracy": 30
+    }
+
+}
