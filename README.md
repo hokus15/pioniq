@@ -347,6 +347,8 @@ TODO
 ### location
 Published from `gps_data.py` script.
 
+TODO
+
 
 ## [OPTIONAL] Loggly installation
 As the Raspberry Pi will usually run in your car's WiFi there is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enought for the purpose of this project (200 MB/day and 7 days log retention).
