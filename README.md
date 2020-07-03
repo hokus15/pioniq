@@ -1,5 +1,5 @@
 # pioniq
-Extract the Hyundai Ioniq Electric battery data from OBDII and position and publishes it to MQTT broker
+Extract the Hyundai Ioniq Electric battery and odometer data from OBDII, as well as the GPS location (using an external USB device) and publishes it to MQTT broker.
 
 ## Disclaimer
 This is my first python programming experience and I'm not a Linux expert so I'm pretty sure that the scripts may be far from efficient so don't be too hard with me when you find that I'm not following best practices neither doing things in the most optimal way. If you find that the scripts may be improved (I'm sure they are), just raise a PR with your improvements. Thanks!!
@@ -22,8 +22,10 @@ If you are new to Raspberry Pi, you should get some information about it [here](
 
 If you are already familiar with the Raspberry Pi, you can start.
 
-I recommend to use the Raspberry Pi OS (previously called Raspbian).
-Use [Raspberry Pi Imager](https://www.raspberrypi.org/downloads/) for an easy way to install Raspberry Pi OS and other operating systems to an SD card ready to use with your Raspberry Pi.
+The scripts and the following procedure has been designed and tested to use the Raspberry Pi OS (previously called Raspbian).
+
+Use [Raspberry Pi Imager](https://www.raspberrypi.org/downloads/) for an easy way to install Raspberry Pi OS (and other operating systems) to an SD card.
+
 Once you have Raspberry Pi Imager installed open it and:
 * Under `Choose OS` option select `Raspberry Pi OS (other)` and then choose `Raspberry Pi OS Lite (32-bit)`
 * Choose your SD card
@@ -61,7 +63,10 @@ network={
 
 ### First Raspberry Pi startup
 I recommend that you set up your home router to set a static address to the Raspberry Pi. As the procedure is different for every router, please google for some information on how to do it on your router.
-Once you have set up your IP address, turn on your Raspberry Pi and use any SSH client to connect to it. The default username is `pi` the password `raspberry`
+
+Once you have set up your IP address, turn on your Raspberry Pi and use any SSH client to connect to it.
+
+The default username is `pi` the password `raspberry`
 
 Change the default password by typing: `passwd`
 
@@ -93,18 +98,18 @@ sudo reboot
 
 Then install needed packages for the scripts to run:
 ```
-sudo apt-get install bluetooth bluez-tools blueman python python-pip git
+sudo apt-get install bluetooth bluez-tools blueman python python-pip git python-gps
 pip install paho-mqtt obd
 ```
 
-### Pairing OBD2 Bluetooth Dongle with Raspberry Pi
-**IMPORTANT** ALL requirements need to be met to pair the OBD2 bluetooth with the Raspberry Pi:
-1. OBD2 dongle is plugged into the OBD2 port of your IONIQ
-2. Raspberry Pi is within the range of the OBD2 bluetooth dongle (<5m)
-3. Raspberry Pi is connected to the Wi-Fi. I use a powerbank to give power the Raspberry Pi when its close to the car. In my case using the USB car charger makes to be out of WiFi range.
+### Pairing OBDII Bluetooth Dongle with Raspberry Pi
+**IMPORTANT** Next requirements need to be met to pair the OBDII bluetooth with the Raspberry Pi:
+1. OBDII dongle is plugged into the OBDII port of your car
+2. Raspberry Pi is within the range of the OBDII bluetooth dongle (<5m)
+3. Raspberry Pi is connected to the Wi-Fi. I use a powerbank to give power the Raspberry Pi when its close to the car. In my case using the USB car charger makes the RaspberryPi to be out of WiFi range.
 4. The vehicle is switched on
 
-*I'm lucky and meeting all those requirements are easy for me!!!. If not you, will need to find an alternative way do it.*
+*I'm lucky and meeting all those requirements is easy for me!!!. If are not so lucky, you will need to find an alternative way pair the OBDII with the Raspberry Pi.*
 
 Once those requirements are fulfilled you can start with the pairing process:
 ```
@@ -117,19 +122,29 @@ agent on
 scan on
 ```
 
-You will get a list of all Bluetooth devices in range. Here should also appear your OBD2 dongle. You will also see the device address (Format: XX: XX: XX: XX: XX: XX). Note down this address because it's important for the next steps!. Please in all the following commands replace `XX:XX:XX:XX:XX:XX` with the address of your OBD2 dongle.
+You will get a list of all Bluetooth devices in range.
 
-Once identified your OBD2 device on the list type :
+Here should also appear your OBDII dongle.
+
+You will also see the device address (Format: XX: XX: XX: XX: XX: XX). Note down this address because it's important for the next steps!.
+
+Please replace `XX:XX:XX:XX:XX:XX` with the address of your OBDII dongle for next steps.
+
+Once identified your OBDII device on the list type :
 ```
 pair XX:XX:XX:XX:XX:XX
 ```
 
-Now you have to enter the device code. Mostly it is “1234”or “0000”. If that worked, you still have to trust the device in general, so this procedure does not have to be repeated permanently:
+Now you have to enter the device code. Usually it's `1234` or `0000`, see your OBDII instructions manual to find yours.
+
+If that worked, you still have to trust the device, so you don't need to pair the device every time:
 ```
 trust XX:XX:XX:XX:XX:XX
 ```
 
-To be able to access the OBD2 dongle, it must be integrated as a serial device. This needs to be done after each restart. To do this, we add the following line to the file `/etc/rc.local`
+To be able to access the OBDII dongle, it must be integrated as a serial device. This needs to be done after each restart.
+
+To create your OBDII dongle as a serial device, add the following line to the file `/etc/rc.local`:
 ```
 sudo rfcomm bind hci0 XX:XX:XX:XX:XX:XX 1
 ```
@@ -139,10 +154,12 @@ Then reboot the Raspberry Pi
 sudo reboot
 ```
 
-### Configuring the GPS
-If you plan to use the GPS module please install as well needed packages:
+### [OPTIONAL] Configuring the GPS
+Do this step **ONLY** if you plan to use the USB GPS device to publish your car's location.
+
+Install needed python packages:
 ```
-sudo apt-get install gpsd gpsd-clients python-gps ntp
+sudo apt-get install gpsd gpsd-clients ntp
 ```
 
 Now configure the gpsd daemon:
@@ -150,7 +167,7 @@ Now configure the gpsd daemon:
 sudo nano /etc/default/gpsd
 ```
 
-The file should look something like:
+The file should look something like (I only needed to change the `DEVICES` property):
 ```
 # Default settings for the gpsd init script and the hotplug wrapper.
 
@@ -173,7 +190,7 @@ And then restart the service.
 sudo systemctl restart gpsd
 ```
 
-For testing that GPS works, try to run `cgps` utility. Make sure you have the GPS USB plugged in in your Raspberry Pi port. You will need the USB to micro USB adapter.
+For testing that GPS is working, make sure you have the GPS USB plugged in in your Raspberry Pi port (you will need the USB to micro USB adapter) and try to run `cgps` utility. 
 ```
 cgps
 ```
@@ -224,11 +241,19 @@ H.10- 04/25/2019 115","activated":"2020-07-01T17:03:24.423Z","flags":1,"native":
 "eps":20.21,"epc":38.25}
 ```
 
-If you are not getting GPS coordinates something may be wrong.
+If you are not getting GPS coordinates something may be wrong. Please google for some information.
+
+### Wiring
+
+1. [ELM327 Bluetooth scanner](https://www.amazon.es/Bluetooth-Scanner-Diagn%C3%B3stico-Wireless-Mercedes/dp/B079HS1LWB/ref=sr_1_15?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ELM327&qid=1593189429&s=electronics&sr=1-15) should be plugged into the OBDII port of your car.
+2. [USB car charger](https://www.amazon.es/gp/product/B01HYZ8QPO/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) should be plugged into the 12V plug of your car.
+3. [LTE Stick Huawei E3372](https://www.amazon.es/Huawei-USB-Stick-E3372-Inal%C3%A1mbrica/dp/B013UURTL4/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=LTE+Stick+Huawei+E3372&qid=1593188977&s=electronics&sr=1-2) should be plugged into the USB car charger (you may want to use the [USB cable extender](https://www.amazon.es/Cable-SODIAL-enchufe-extnsion-conector/dp/B01EIYCERU/ref=sr_1_25?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=alargador+USB&qid=1593189217&s=electronics&sr=1-25) to hide a bit the stick).
+3. [Raspberry Pi Zero W](https://www.amazon.es/Raspberry-Pi-Zero-wh/dp/B07BHMRTTY/ref=sr_1_5?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Raspberry+Pi+Zero+W&qid=1593189037&s=electronics&sr=1-5) should be plugged into the USB car charger using the [USB to Micro USB adapter](https://www.amazon.es/gp/product/B003YKX6WM/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&psc=1).
+4. **[Optional]** [USB GPS receiver GlobalSat BU-353-S4](https://www.amazon.es/GlobalSat-BU-353-S4-Receptor-SiRF-Star/dp/B008200LHW/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2ENXQ7W8O8JQE) should be plugged to the Raspberry Pi using the [USB OTG cable](https://www.amazon.es/UGREEN-10396P-Hembra-Tel%C3%A9fono-Paquete/dp/B00N9S9Z0G/ref=sr_1_3?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=usb+female+to+micro+usb&qid=1593628139&s=computers&sr=1-3).
 
 ### Installing Python Scripts
 
-Now that we can stablish connection with OBD2 dongle and the GPS is working we can install the scripts that will do all the magic!
+Now that we can stablish connection with OBDII dongle and the GPS is working we can install the scripts that will do all the magic!
 
 Maybe it's not the best practise but I install the scripts in the pi home directory `/home/pi`.
 
@@ -240,14 +265,10 @@ git clone https://github.com/hokus15/pioniq.git
 
 ### Execute the Python Scripts
 
-To test if everything works:
-1. [ELM327 Bluetooth scanner](https://www.amazon.es/Bluetooth-Scanner-Diagn%C3%B3stico-Wireless-Mercedes/dp/B079HS1LWB/ref=sr_1_15?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ELM327&qid=1593189429&s=electronics&sr=1-15) is plugged into the OBD2 port of your IONIQ
-2. [USB car charger](https://www.amazon.es/gp/product/B01HYZ8QPO/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1) is plugged into the 12V plug of your IONIQ.
-3. [LTE Stick Huawei E3372](https://www.amazon.es/Huawei-USB-Stick-E3372-Inal%C3%A1mbrica/dp/B013UURTL4/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=LTE+Stick+Huawei+E3372&qid=1593188977&s=electronics&sr=1-2) is plugged into the USB car charger (you may want to use the [USB cable extender](https://www.amazon.es/Cable-SODIAL-enchufe-extnsion-conector/dp/B01EIYCERU/ref=sr_1_25?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=alargador+USB&qid=1593189217&s=electronics&sr=1-25) to hide a bit the stick).
-3. Raspberry Pi is plugged into the USB car charger using the [USB to Micro USB adapter](https://www.amazon.es/gp/product/B003YKX6WM/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&psc=1)
-4. [Optional] [USB GPS receiver GlobalSat BU-353-S4](https://www.amazon.es/GlobalSat-BU-353-S4-Receptor-SiRF-Star/dp/B008200LHW/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2ENXQ7W8O8JQE) is plugged to the Raspberry Pi using the [USB OTG cable](https://www.amazon.es/UGREEN-10396P-Hembra-Tel%C3%A9fono-Paquete/dp/B00N9S9Z0G/ref=sr_1_3?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=usb+female+to+micro+usb&qid=1593628139&s=computers&sr=1-3)
-5. The vehicle is switched on
-6. The Raspberry Pi has been connected to the car WiFi
+To test if everything works and execute the first script run:
+1. Make sure all the wiring is properly done (see Wiring section abobe).
+2. The vehicle is switched on
+3. The Raspberry Pi has been connected to the car WiFi
 
 Run the command:
 ```
@@ -270,13 +291,13 @@ And configure the following cron job:
 * * * * * python /home/pi/pioniq/battery_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
 ```
 
-### Run autoamtically GPS data script
+### [OPTIONAL] Run autoamtically GPS data script
 
-**OPTIONAL** This only needs to be done if you have the GPS device and you want to publish your IONIQ location.
+Do this step **ONLY** if you plan to use the USB GPS device to publish your car's location.
 
 To run the `gps_data.py` script automatically we need to set it up as a service, to do so:
 
-Create a file called `gps_data.service` in `/etc/systemd/system` folder with the follwing content:
+Create a file called `gps_data.service` in `/etc/systemd/system` folder with the following content:
 ```
 [Unit]
 Description=Publish GPS data to MQTT
@@ -302,9 +323,33 @@ sudo systemctl enable gps_data.service
 To have WiFi in the car, I use a UBS powered stick that as soon as it get some power it startup and connects to the 4G LTE network and operates as a WiFi router.
 In my case I use the [Huawei E3372 LTE stick](https://www.amazon.es/Huawei-USB-Stick-E3372-Inal%C3%A1mbrica/dp/B013UURTL4/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=LTE+Stick+Huawei+E3372&qid=1593188977&s=electronics&sr=1-2). Please refer to your specific stick instructions on how to configure it.
 
-## Loggly installation
-**OPTIONAL**
-As the Raspberry Pi will usually run in your car's WiFi there is going to be complex for you to debug or debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier more than enought for the purpose of this project (200 MB/day and 7 days log retention).
+## JSON format
+
+The battery, odometer and location information is published in MQTT as a string or a JSON object, depending on the information published.
+
+Those are the MQTT topics and format used for each one:
+
+### state
+Published from `battery_data.py` script.
+
+TODO
+
+### battery
+Published from `battery_data.py` script.
+
+TODO
+
+### odometer
+Published from `battery_data.py` script.
+
+TODO
+
+### location
+Published from `gps_data.py` script.
+
+
+## [OPTIONAL] Loggly installation
+As the Raspberry Pi will usually run in your car's WiFi there is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enought for the purpose of this project (200 MB/day and 7 days log retention).
 
 Just create a free account in [Loggly](https://www.loggly.com/) and follow instructions on how to [Linux Log File Monitoring](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/file-monitoring.htm).
 
@@ -314,4 +359,5 @@ All this work has been possible by putting together different pieces like:
 - [Ingesting GPS Data From Raspberry PI Zero Wireless With a USB GPS Device](https://dzone.com/articles/iot-ingesting-gps-data-from-raspberry-pi-zero-wire)
 - [python-OBD](https://github.com/brendan-w/python-OBD/tree/master/obd)
 - [EVNotiPi](https://github.com/EVNotify/EVNotiPi)
+- [OBD-PIDs-for-HKMC-EVs](https://github.com/JejuSoul/OBD-PIDs-for-HKMC-EVs)
 - and of course lot of patience and [Google](https://www.google.com/)
