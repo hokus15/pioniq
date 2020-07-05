@@ -22,6 +22,13 @@ def on_publish(client, userdata, mid):
     logger.debug("Publish message id: {}".format(mid))
     pass
 
+def on_connect(client, userdata, flags, rc):
+    if rc==0:
+        client.connected_flag=True #set flag
+        logger.info("Successfully connected to MQTT")
+    else:
+        logger.error("Not connected to MQTT. Bad connection Returned code=",rc)
+
 class GpsPoller(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -47,7 +54,7 @@ if __name__ == '__main__':
     
     file_handler = logging.FileHandler(os.path.dirname(os.path.realpath(__file__)) + '/gps_data.log') # sends output to gps_data.log file
     file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
-    file_handler.setLevel(logging.WARNING)
+    file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
     logger.setLevel(logging.DEBUG)
@@ -69,10 +76,14 @@ if __name__ == '__main__':
         # Start GPS Poller thread
         gpsp.start()
         
+        mqtt.Client.connected_flag = False
         # Create MQTT client
         mqtt_client= mqtt.Client(client_id="gps-data-script", protocol=mqtt.MQTTv311, transport="tcp")
         # Assign callback functions
         mqtt_client.on_publish = on_publish 
+        mqtt_client.on_connect = on_connect
+        # Start loop to process callbacks
+        mqtt_client.loop_start()
         # Set tls
         mqtt_client.tls_set()
         # Set user and password
@@ -80,7 +91,12 @@ if __name__ == '__main__':
         # Enable MQTT logger
         mqtt_client.enable_logger(logger)
         # Conect to MQTT server
-        mqtt_client.connect(broker_address,port)
+        while not mqtt_client.connected_flag:
+            try:
+                mqtt_client.connect(broker_address,port)
+            except Exception as err:
+                logger.error("MQTT connection could not be established: {}, retrying... ".format(err), exc_info=False)
+            time.sleep(1)
 
         previous_latitude = 0
         previous_logitude = 0
@@ -92,11 +108,12 @@ if __name__ == '__main__':
         while True:
             try:
                 # It may take some seconds to get good data
-                logger.info("Latitude error (EPY): +/- {} m".format(gpsd.fix.epy))
-                logger.info("Longitude error (EPX): +/- {} m".format(gpsd.fix.epx))
+                logger.debug("Latitude error (EPY): +/- {} m".format(gpsd.fix.epy))
+                logger.debug("Longitude error (EPX): +/- {} m".format(gpsd.fix.epx))
                 fix_accuracy = max(gpsd.fix.epy, gpsd.fix.epx)
                 logger.info("Location accuracy: +/- {} m".format(fix_accuracy))
                 if fix_accuracy < max_accuracy:
+                    logger.debug("GPS position fixed with +/- {} m".format(fix_accuracy))
                     location = {'latitude': gpsd.fix.latitude,
                                 'longitude': gpsd.fix.longitude,
                                 'gps_accuracy': fix_accuracy,
@@ -121,9 +138,10 @@ if __name__ == '__main__':
                     previous_logitude = gpsd.fix.longitude
     
                     # Publish to MQTT
-                    logger.info("GPS position fixed. Publishing to MQTT: {}".format(json.dumps(location)))
+                    logger.debug("Publishing positon to MQTT...")
+                    logger.debug("{}".format(json.dumps(location)))
                     result = mqtt_client.publish(topic=topic_prefix + "location", payload=json.dumps(location), qos=0, retain=True)
-                    result.wait_for_publish()
+                    result.wait_for_publish()                    
                     if (result.rc == 0): 
                         logger.info("Message successfully published: " + str(result))
                         published_messages += 1
@@ -149,6 +167,7 @@ if __name__ == '__main__':
         logger.info("Killing threads...")
         gpsp.running = False
         gpsp.join()   # wait for the thread to finish what it's doing
+        mqtt_client.loop_stop()
         mqtt_client.disconnect()
         logger.info("{} location points published".format(published_messages))
         logger.info("=== Script end ===")
