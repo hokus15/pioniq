@@ -83,9 +83,9 @@ def publish_data_mqtt(msgs):
                     tls={'tls_version':ssl.PROTOCOL_TLS},
                     protocol=mqtt.MQTTv311,
                     transport="tcp")
-        logger.info("Messages published to MQTT")
-    except Exception as ex:
-        logger.exception("Error publishing to MQTT: {}".format(ex))
+        logger.warning("{} message(s) published to MQTT".format(len(msgs)))
+    except Exception as err:
+        logger.error("Error publishing to MQTT: {}".format(err), exc_info=False)
 
 # main script
 if __name__ == '__main__':
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     
     file_handler = logging.FileHandler(os.path.dirname(os.path.realpath(__file__)) + '/battery_data.log') # sends output to battery_data.log file
     file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
-    file_handler.setLevel(logging.ERROR)
+    file_handler.setLevel(logging.WARNING)
     logger.addHandler(file_handler)
 
     logger.setLevel(logging.DEBUG)
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     mqtt_msgs = []
     
     try:
-        logger.info("=== Script start ===")
+        logger.warning("=== Script start ===")
         
         mqtt_msgs.extend([{'topic':topic_prefix + "state", 'payload':"ON", 'qos':0, 'retain':True}])
         
@@ -255,9 +255,8 @@ if __name__ == '__main__':
             # Query odometer
             odometer_value = connection.query(odo)
         except (ValueError, CanError, NoData) as err:
-            logger.error("Error getting odometer value: {}".format(err), exc_info=False) # Not available when car engine is off
-            pass
-    
+            logger.warning("Error getting odometer value: {}".format(err), exc_info=False) # Not available when car engine is off
+
         # Only set odometer data if present
         if 'odometer_value' in locals() and odometer_value is not None:
             logger.info("Got odometer value: {}".format(odometer_value.value))
@@ -276,4 +275,4 @@ if __name__ == '__main__':
     finally:
         publish_data_mqtt(mqtt_msgs)
         connection.close()
-        logger.info("===  Script end  ===")
+        logger.warning("===  Script end  ===")
