@@ -330,25 +330,109 @@ The battery, odometer and location information is published in MQTT as a string 
 Those are the MQTT topics and format used for each one:
 
 ### state
-Published from `battery_data.py` script.
+Car state is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']state` i.e.: `car/sensor/ioniq/state` as "ON" constant.
 
-TODO
+Sample:
+```
+ON
+```
 
 ### battery
-Published from `battery_data.py` script.
+Battery information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']battery` i.e.: `car/sensor/ioniq/battery` as a JSON object with the following format:
 
-TODO
+```
+{
+   availableChargePower         float. Max power supported for charging in kWh. It's a constant that may vary by car. For IONIQ Electric it's 98kWh.
+   cumulativeChargeCurrent      float. Cumulative energy charged in kWh.
+   timestamp                    float. Linux Epoch time.
+   cumulativeDischargeCurrent   float. Cumulative energy discharged in kWh.
+   cumulativeEnergyDischarged   float. ??
+   soc_bms                      float. Status of charge (as seen as battery management system).
+   cumulativeEnergyCharged      float. ??
+   rapidChargePort              0 or 1. Is charging using rapid charge port? 0: false, 1: true.
+   availableDischargePower      float. Max discharge power in kWh. It's a constant that may vary by car. For IONIQ Electric it's 98kWh.
+   auxBatteryVoltage            float. Voltage of the aux battery (12V battery).
+   fanFeedback                  0 or 1. ??
+   normalChargePort             0 or 1. Is charging using normal charge port? 0: false, 1: true.
+   soc_display                  integer (0-100). Status of charge (as seen as in car display).
+   soh                          float. Status of health of the battery in percentage.
+   fanStatus                    0 or 1. Is battery fan turned on? 0: false, 1: true.
+   charging                     0 or 1. Is the car charging ? 0: false, 1: true.
+}
+```
+
+Sample:
+```
+{
+   "availableChargePower":98.0,
+   "cumulativeChargeCurrent":8267.4,
+   "timestamp":1593983116,
+   "cumulativeDischargeCurrent":8231.6,
+   "cumulativeEnergyDischarged":2902.4,
+   "soc_bms":55.5,
+   "cumulativeEnergyCharged":2981.8,
+   "rapidChargePort":0,
+   "availableDischargePower":98.0,
+   "auxBatteryVoltage":14.5,
+   "fanFeedback":0,
+   "normalChargePort":0,
+   "soc_display":57,
+   "soh":100.0,
+   "fanStatus":0,
+   "charging":0
+}
+```
 
 ### odometer
-Published from `battery_data.py` script.
+Odometer information in Kilometers is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']odometer` i.e.: `car/sensor/ioniq/odometer` as a int value.
 
-TODO
+Sample:
+```
+22567
+```
 
 ### location
-Published from `gps_data.py` script.
+Location information is published from `gps_data.py` script in the `config['mqtt']['topic_prefix']location` i.e.: `car/sensor/ioniq/location` as a JSON object with the following format:
+```
+{
+    latitude        float. Latitude.
+    longitude       float. Longitude.
+    last_update     float. Linux Epoch time.
+    gps_accuracy    float. Max of latitude or longitude estimated error.
+    platitude       float. Latitude fixed on last iteration.
+    plongitude      float. Longitude fixed on last iteration.
+    track           float. Course over ground in degrees from True North.
+    speed           float. Speed in m/s.
+    epx             float. Estimated longitude error.
+    epy             float. Estimated latitude error.
+    epv             float. Estimated altitude error.
+    ept             float. Estimated time error.
+    eps             float. Estimated Speed error.
+    mode            float. NMEA mode; values are 0 - NA, 1 - No Fix, 2D and 3D.
+    climb           float. Climb (Positive) or Sink (Negative) rate in m/s of upwards or downwards movement.
+}
+```
 
-TODO
-
+Sample:
+```
+{
+   "track":326.4788,
+   "platitude":19.634422362,
+   "speed":0.216,
+   "epx":9.772,
+   "epy":15.465,
+   "epv":30.186,
+   "ept":0.005,
+   "eps":30.93,
+   "longitude":23.23253151,
+   "last_update":1593980780,
+   "gps_accuracy":15.465,
+   "mode":3,
+   "latitude":19.644422362,
+   "climb":-0.021,
+   "plongitude":23.24253151,
+}
+```
 
 ## [OPTIONAL] Loggly installation
 As the Raspberry Pi will usually run in your car's WiFi there is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enought for the purpose of this project (200 MB/day and 7 days log retention).
