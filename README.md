@@ -1,6 +1,10 @@
 # pioniq
 Extract the Hyundai Ioniq Electric battery and odometer data from OBDII, as well as the GPS location (using an external USB device) and publishes it to MQTT broker.
 
+## Use cases
+
+TODO
+
 ## Disclaimer
 This is my first python programming experience and I'm not a Linux expert so I'm pretty sure that the scripts may be far from efficient so don't be too hard with me when you find that I'm not following best practices neither doing things in the most optimal way. If you find that the scripts may be improved (I'm sure they are), just raise a PR with your improvements. Thanks!!
 
