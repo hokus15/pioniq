@@ -342,20 +342,20 @@ Battery information is published from `battery_data.py` script in the `config['m
 
 ```
 {
-   availableChargePower         float. Max power supported for charging in kWh. It's a constant that may vary by car. For IONIQ Electric it's 98kWh.
-   cumulativeChargeCurrent      float. Cumulative energy charged in kWh.
+   availableChargePower         float. Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   cumulativeChargeCurrent      float. Cumulative energy charged in A.
    timestamp                    float. Linux Epoch time.
-   cumulativeDischargeCurrent   float. Cumulative energy discharged in kWh.
-   cumulativeEnergyDischarged   float. ??
-   soc_bms                      float. Status of charge (as seen as battery management system).
-   cumulativeEnergyCharged      float. ??
+   cumulativeDischargeCurrent   float. Cumulative energy discharged in A.
+   cumulativeEnergyDischarged   float. Cumulative energy discharged in kWh.
+   soc_bms                      float (0-100). Status of charge in % (as seen by Battery Management System).
+   cumulativeEnergyCharged      float. Cumulative energy charged in kWh.
    rapidChargePort              0 or 1. Is charging using rapid charge port? 0: false, 1: true.
-   availableDischargePower      float. Max discharge power in kWh. It's a constant that may vary by car. For IONIQ Electric it's 98kWh.
-   auxBatteryVoltage            float. Voltage of the aux battery (12V battery).
+   availableDischargePower      float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   auxBatteryVoltage            float. Voltage of the aux battery in V. (12V battery).
    fanFeedback                  0 or 1. ??
    normalChargePort             0 or 1. Is charging using normal charge port? 0: false, 1: true.
-   soc_display                  integer (0-100). Status of charge (as seen as in car display).
-   soh                          float. Status of health of the battery in percentage.
+   soc_display                  integer (0-100). Status of charge in % (as seen as in car display).
+   soh                          float (0-100). Status of health of the battery in %.
    fanStatus                    0 or 1. Is battery fan turned on? 0: false, 1: true.
    charging                     0 or 1. Is the car charging ? 0: false, 1: true.
 }
