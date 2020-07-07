@@ -343,19 +343,19 @@ Battery information is published from `battery_data.py` script in the `config['m
 ```
 {
    availableChargePower         float. Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   cumulativeChargeCurrent      float. Cumulative energy charged in A.
+   cumulativeChargeCurrent      float. Cumulative current charged in A.
    timestamp                    float. Linux Epoch time.
-   cumulativeDischargeCurrent   float. Cumulative energy discharged in A.
+   cumulativeDischargeCurrent   float. Cumulative current discharged in A.
    cumulativeEnergyDischarged   float. Cumulative energy discharged in kWh.
-   soc_bms                      float (0-100). Status of charge in % (as seen by Battery Management System).
+   soc_bms                      float (0-100). Baterry status of charge in % (as seen by Battery Management System).
    cumulativeEnergyCharged      float. Cumulative energy charged in kWh.
    rapidChargePort              0 or 1. Is charging using rapid charge port? 0: false, 1: true.
    availableDischargePower      float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
    auxBatteryVoltage            float. Voltage of the aux battery in V. (12V battery).
    fanFeedback                  0 or 1. ??
    normalChargePort             0 or 1. Is charging using normal charge port? 0: false, 1: true.
-   soc_display                  integer (0-100). Status of charge in % (as seen as in car display).
-   soh                          float (0-100). Status of health of the battery in %.
+   soc_display                  integer (0-100). Battery status of charge in % (as seen as in car display).
+   soh                          float (0-100). Battery status of health in %.
    fanStatus                    0 or 1. Is battery fan turned on? 0: false, 1: true.
    charging                     0 or 1. Is the car charging ? 0: false, 1: true.
 }
@@ -408,7 +408,7 @@ Location information is published from `gps_data.py` script in the `config['mqtt
     epv             float. Estimated altitude error.
     ept             float. Estimated time error.
     eps             float. Estimated Speed error.
-    mode            float. NMEA mode; values are 0 - NA, 1 - No Fix, 2D and 3D.
+    mode            float. NMEA mode; values are: 0 - NA, 1 - No Fix, 2D and 3D.
     climb           float. Climb (Positive) or Sink (Negative) rate in m/s of upwards or downwards movement.
 }
 ```
