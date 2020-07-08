@@ -96,7 +96,9 @@ if __name__ == '__main__':
     console_handler.setLevel(logging.DEBUG)
     logger.addHandler(console_handler)
     
-    file_handler = logging.FileHandler(os.path.dirname(os.path.realpath(__file__)) + '/battery_data.log') # sends output to battery_data.log file
+    file_handler = logging.TimedRotatingFileHandler(os.path.dirname(os.path.realpath(__file__)) + '/battery_data.log',
+                                                    when='midnight',
+                                                    backupCount=15) # sends output to battery_data.log file rotating it at midnight and storing latest 15 days
     file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
     file_handler.setLevel(logging.WARNING)
     logger.addHandler(file_handler)
