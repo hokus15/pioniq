@@ -312,6 +312,8 @@ WorkingDirectory=/home/pi/
 User=pi
 Type=idle
 ExecStart=/usr/bin/python /home/pi/pioniq/gps_data.py
+# Redirect stderr to /dev/null to avoid logging twice (once from log file and another from stderr (StreamHandler)) to loggly
+StandardError=null
 
 [Install]
 WantedBy=multi-user.target
