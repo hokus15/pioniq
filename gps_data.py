@@ -48,7 +48,7 @@ if __name__ == '__main__':
     logger = logging.getLogger('gps')
     
     console_handler = logging.StreamHandler() # sends output to stderr
-    console_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
+    console_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-3s %(levelname)-8s %(message)s"))
     console_handler.setLevel(logging.DEBUG)
     logger.addHandler(console_handler)
     
@@ -56,7 +56,7 @@ if __name__ == '__main__':
                                                     when='midnight',
                                                     backupCount=15) # sends output to gps_data.log file rotating it at midnight and storing latest 15 days
 
-    file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
+    file_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-3s %(levelname)-8s %(message)s"))
     file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
@@ -85,21 +85,22 @@ if __name__ == '__main__':
         # Assign callback functions
         mqtt_client.on_publish = on_publish 
         mqtt_client.on_connect = on_connect
-        # Start loop to process callbacks
-        mqtt_client.loop_start()
         # Set tls
         mqtt_client.tls_set()
         # Set user and password
         mqtt_client.username_pw_set(user,password)
         # Enable MQTT logger
         mqtt_client.enable_logger(logger)
+        # Start loop to process callbacks
+        mqtt_client.loop_start()
         # Conect to MQTT server
         while not mqtt_client.connected_flag:
             try:
+                logger.debug("Trying to connect to MQTT server")
                 mqtt_client.connect(broker_address,port)
             except Exception as err:
                 logger.error("MQTT connection could not be established: {}, retrying... ".format(err), exc_info=False)
-            time.sleep(1)
+            time.sleep(5)
 
         previous_latitude = 0
         previous_logitude = 0
@@ -144,7 +145,7 @@ if __name__ == '__main__':
                     logger.debug("Publishing positon to MQTT...")
                     logger.debug("{}".format(json.dumps(location)))
                     result = mqtt_client.publish(topic=topic_prefix + "location", payload=json.dumps(location), qos=0, retain=True)
-                    result.wait_for_publish()                    
+                    result.wait_for_publish()
                     if (result.rc == 0): 
                         logger.info("Message successfully published: " + str(result))
                         published_messages += 1
@@ -168,9 +169,9 @@ if __name__ == '__main__':
         logger.exception("Unexpected error: {}".format(ex))
     finally:
         logger.info("Killing threads...")
-        gpsp.running = False
-        gpsp.join()   # wait for the thread to finish what it's doing
         mqtt_client.loop_stop()
         mqtt_client.disconnect()
+        gpsp.running = False
+        gpsp.join()   # wait for the thread to finish what it's doing
         logger.info("{} location points published".format(published_messages))
         logger.info("=== Script end ===")
