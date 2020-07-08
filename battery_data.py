@@ -76,7 +76,7 @@ def publish_data_mqtt(msgs):
         publish.multiple(msgs,
                     hostname=broker_address,
                     port=port,
-                    client_id=None,
+                    client_id="battery-data-script",
                     keepalive=60,
                     will=None,
                     auth={'username':user, 'password':password},
