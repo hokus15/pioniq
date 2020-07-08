@@ -83,7 +83,7 @@ def publish_data_mqtt(msgs):
                     tls={'tls_version':ssl.PROTOCOL_TLS},
                     protocol=mqtt.MQTTv311,
                     transport="tcp")
-        logger.warning("{} message(s) published to MQTT".format(len(msgs)))
+        logger.info("{} message(s) published to MQTT".format(len(msgs)))
     except Exception as err:
         logger.error("Error publishing to MQTT: {}".format(err), exc_info=False)
 
@@ -92,15 +92,15 @@ if __name__ == '__main__':
     logger = logging.getLogger('battery')
     
     console_handler = logging.StreamHandler() # sends output to stderr
-    console_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
+    console_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-10s %(levelname)-8s %(message)s"))
     console_handler.setLevel(logging.DEBUG)
     logger.addHandler(console_handler)
     
     file_handler = logging.handlers.TimedRotatingFileHandler(os.path.dirname(os.path.realpath(__file__)) + '/battery_data.log',
                                                     when='midnight',
                                                     backupCount=15) # sends output to battery_data.log file rotating it at midnight and storing latest 15 days
-    file_handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s [%(name)s] %(message)s"))
-    file_handler.setLevel(logging.WARNING)
+    file_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-10s %(levelname)-8s %(message)s"))
+    file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
     logger.setLevel(logging.DEBUG)
@@ -117,7 +117,7 @@ if __name__ == '__main__':
     mqtt_msgs = []
     
     try:
-        logger.warning("=== Script start ===")
+        logger.info("=== Script start ===")
         
         mqtt_msgs.extend([{'topic':topic_prefix + "state", 'payload':"ON", 'qos':0, 'retain':True}])
         
@@ -277,4 +277,4 @@ if __name__ == '__main__':
     finally:
         publish_data_mqtt(mqtt_msgs)
         connection.close()
-        logger.warning("===  Script end  ===")
+        logger.info("===  Script end  ===")
