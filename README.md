@@ -267,6 +267,54 @@ cd ~
 git clone https://github.com/hokus15/pioniq.git
 ```
 
+### Config files format
+
+Config files are JSON files and should be created to run the scripts. You have a template file for each of the scripts:
+
+pioniq/battery_data.config.json file format:
+```
+{
+    mqtt: {               object. MQTT configuration section.
+        broker :          string. String representing the MQTTS broker host name. i.e: test.mosquitto.org
+        port :            int. MQTTS port. i.e: 8883
+        user :            string. MQTTS broker user name.
+        password :        string. MQTTS broker password.
+        topic_prefix :    string. Topic prefix to use for publishing MQTT messages. i.e: car/sensor/ioniq/
+    },
+    serial: {             object. OBDII serial configuration section.
+        port :            string. Serial port assigned to you OBDII dongle. i.e: /dev/rfcomm0
+        baudrate :        int. Baud rate for OBDII dongle connection. i.e: 9600
+    }
+}
+```
+
+pioniq/gps_data.config.json file format:
+```
+{
+    mqtt: {               object. MQTT configuration section.
+        broker :          string. String representing the MQTTS broker host name. i.e: test.mosquitto.org
+        port :            int. MQTTS port. i.e: 8883
+        user :            string. MQTTS broker user name.
+        password :        string. MQTTS broker password.
+        topic_prefix :    string. Topic prefix to use for publishing MQTT messages. i.e: car/sensor/ioniq/
+    },
+    service: {            object. Service configuration section.
+        sleep:            int. Seconds to wait beween gps data gathering. i.e: 15
+        min_accuracy:     int. Min accuracy allowed to publish location in meters. Any location with and accuracy in meters higher than this value won't be published to MQTT. i.e: 30
+    }
+}
+```
+
+### Prepare config files
+
+Copy config files from template.
+```
+cp pioniq/battery_data.config.template.json pioniq/battery_data.config.json
+cp pioniq/gps_data.config.template.json pioniq/gps_data.config.json
+```
+
+Adapt them to your needs.
+
 ### Execute the Python Scripts
 
 To test if everything works and execute the first script run:
