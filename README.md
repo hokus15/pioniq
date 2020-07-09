@@ -331,7 +331,7 @@ This should publish battery information to the configured MQTT server.
 
 If this works congratulations you are almost done!
 
-### Run autoamtically Battery data script
+### Run automatically Battery data script
 
 To run the `battery_data.py` script automatically every minute, we need to set up a cron job, to do so:
 ```
@@ -343,7 +343,7 @@ And configure the following cron job:
 * * * * * python /home/pi/pioniq/battery_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
 ```
 
-### [OPTIONAL] Run autoamtically GPS data script
+### [OPTIONAL] Run automatically GPS data script
 
 Do this step **ONLY** if you plan to use the USB GPS device to publish your car's location.
 
@@ -489,7 +489,7 @@ Sample:
 ```
 
 ## [OPTIONAL] Loggly installation
-As the Raspberry Pi will usually run in your car's WiFi there is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enought for the purpose of this project (200 MB/day and 7 days log retention).
+As the Raspberry Pi will usually run in your car's WiFi it is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enought for the purpose of this project (200 MB/day and 7 days log retention).
 
 Just create a free account in [Loggly](https://www.loggly.com/) and follow instructions on how to [Linux Log File Monitoring](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/file-monitoring.htm).
 
