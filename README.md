@@ -406,11 +406,11 @@ Battery information is published from `battery_data.py` script in the `config['m
    rapidChargePort              0 or 1. Is charging using rapid charge port? 0: false, 1: true.
    availableDischargePower      float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
    auxBatteryVoltage            float. Voltage of the aux battery in V. (12V battery).
-   fanFeedback                  0 or 1. ??
+   fanFeedback                  integer. Fan feedback signal in Hz.
    normalChargePort             0 or 1. Is charging using normal charge port? 0: false, 1: true.
    soc_display                  integer (0-100). Battery status of charge in % (as seen as in car display).
    soh                          float (0-100). Battery status of health in %.
-   fanStatus                    0 or 1. Is battery fan turned on? 0: false, 1: true.
+   fanStatus                    integer (0-9). Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
    charging                     0 or 1. Is the car charging ? 0: false, 1: true.
 }
 ```
