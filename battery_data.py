@@ -258,7 +258,7 @@ if __name__ == '__main__':
             logger.warning("Error getting odometer value: {}".format(err), exc_info=False) # Not available when car engine is off
 
         # Only set odometer data if present
-        if 'odometer_value' in locals() and odometer_value is not None:
+        if 'odometer_value' in locals() and odometer_value is not None and odometer_value.value is not None:
             logger.info("Got odometer value: {}".format(odometer_value.value))
             # Publish odometer data to MQTT
             mqtt_msgs.extend([{'topic':topic_prefix + "odometer", 'payload':odometer_value.value, 'qos':0, 'retain':True}])
