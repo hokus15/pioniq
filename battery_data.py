@@ -70,7 +70,9 @@ def odometer(can_message):
 def publish_data_mqtt(msgs):
     try:
         logger.debug("*** Publish to MQTT ***")
-        logger.debug("{}".format(msgs))
+        for msg in msgs:
+            logger.info("{}".format(msg))
+
         publish.multiple(msgs,
                     hostname=broker_address,
                     port=port,
@@ -117,6 +119,7 @@ if __name__ == '__main__':
     try:
         logger.info("=== Script start ===")
         
+        # Add state data to messages array
         mqtt_msgs.extend([{'topic':topic_prefix + "state", 'payload':"ON", 'qos':0, 'retain':True}])
         
         obd.logger.setLevel(obd.logging.DEBUG)
@@ -238,10 +241,10 @@ if __name__ == '__main__':
                 'availableChargePower':     bytes_to_int(raw_2101.value[7:9]) / 100.0,
                 'availableDischargePower':  bytes_to_int(raw_2101.value[9:11]) / 100.0,
                 })
-        
-            logger.info("Got battery data: {}".format(json.dumps(data_battery)))
-            
-            # Publish battery data to MQTT
+
+            logger.info("Got battery data")
+
+            # Add battery data messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "battery", 'payload':json.dumps(data_battery), 'qos':0, 'retain':True}])
         else:
             logger.error("Got inconsistent data for battery Status Of Health: {}%".format(soh))
@@ -259,9 +262,11 @@ if __name__ == '__main__':
 
         # Only set odometer data if present
         if 'odometer_value' in locals() and odometer_value is not None and odometer_value.value is not None:
-            logger.info("Got odometer value: {}".format(odometer_value.value))
-            # Publish odometer data to MQTT
+            logger.info("Got odometer value")
+            # Add odometer data to messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "odometer", 'payload':odometer_value.value, 'qos':0, 'retain':True}])
+        else:
+            logger.warning("Odometer value doesn't exist or is None")
     except ConnectionError as err:
         logger.error("OBDII connection error: {0}".format(err), exc_info=False)
     except ValueError as err:
