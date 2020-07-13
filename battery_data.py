@@ -66,6 +66,15 @@ def odometer(can_message):
     raw_b22b002 = can_response(can_message)
     return bytes_to_int(raw_b22b002[9:12])
 
+# VIN decoder
+def vin(can_message): 
+    raw_vin = can_response(can_message)
+    vin_str = ""
+    for v in range(16, 33):
+        vin_str = vin_str + chr(bytes_to_int(raw_vin[v:v+1]))
+    return vin_str
+
+
 # Publish all messages to MQTT
 def publish_data_mqtt(msgs):
     try:
@@ -137,15 +146,23 @@ if __name__ == '__main__':
             raise ConnectionError(connection.status())
     
         # Define needed commands
-        can_receive_address_7ec = OBDCommand("CAN Receive Address to 7EC",
+        cmd_can_receive_address_7ec = OBDCommand("ATCRA7EC",
                                             "Set the CAN receive address to 7EC",
                                             b"ATCRA7EC",
                                             0,
                                             raw_string,
                                             ECU.ALL,
                                             False)
-        
-        can_filter_7ce = OBDCommand("CAN filter to 7CE",
+
+        cmd_can_receive_address_7ea = OBDCommand("ATCRA7EA",
+                                            "Set the CAN receive address to 7EA",
+                                            b"ATCRA7EA",
+                                            0,
+                                            raw_string,
+                                            ECU.ALL,
+                                            False)
+
+        cmd_can_filter_7ce = OBDCommand("ATCF7CE",
                                     "Set the CAN filter to 7CE",
                                     b"ATCF7CE",
                                     0,
@@ -153,7 +170,7 @@ if __name__ == '__main__':
                                     ECU.ALL,
                                     False)
         
-        can_mask_7ff = OBDCommand("CAN mask to 7FF",
+        cmd_can_mask_7ff = OBDCommand("ATCM7FF",
                                 "Set the CAN mask to 7FF",
                                 b"ATCM7FF",
                                 0,
@@ -162,85 +179,176 @@ if __name__ == '__main__':
                                 False)
         
         cmd_2101 = OBDCommand("2101",
-                            "2101 command",
+                            "2101 - Extended command - Battery information",
                             b"2101",
                             0,
                             can_response,
                             ECU.ALL,
                             False)
-                            
+
+        cmd_2102 = OBDCommand("2102",
+                            "2102 - Extended command - Battery information",
+                            b"2102",
+                            0,
+                            can_response,
+                            ECU.ALL,
+                            False)
+
+        cmd_2103 = OBDCommand("2103",
+                            "2103 - Extended command - Battery information",
+                            b"2103",
+                            0,
+                            can_response,
+                            ECU.ALL,
+                            False)
+
+        cmd_2104 = OBDCommand("2104",
+                            "2104 - Extended command - Battery information",
+                            b"2104",
+                            0,
+                            can_response,
+                            ECU.ALL,
+                            False)
+
         cmd_2105 = OBDCommand("2105",
-                            "2105 command",
+                            "2105 - Extended command - Battery information",
                             b"2105",
                             0,
                             can_response,
                             ECU.ALL,
                             False)
         
-        odo = OBDCommand("Odometer",
-                            "Get odometer data",
+        cmd_odometer = OBDCommand("ODOMETER",
+                            "22b002 - Extended command - Odometer information",
                             b"22b002",
                             0,
                             odometer,
                             ECU.ALL,
                             False,
                             "7C6")
-    
+
+        cmd_vin = OBDCommand("VIN",
+                            "1A80 - Extended command - Vehicle Identification Number",
+                            b"1A80",
+                            0,
+                            vin,
+                            ECU.ALL,
+                            False,
+                            "7E2")
+
         # Add defined commands to supported commands
-        connection.supported_commands.add(can_receive_address_7ec)
-        connection.supported_commands.add(can_filter_7ce)
-        connection.supported_commands.add(can_mask_7ff)
+        connection.supported_commands.add(cmd_can_receive_address_7ec)
+        connection.supported_commands.add(cmd_can_receive_address_7ea)
+        connection.supported_commands.add(cmd_can_filter_7ce)
+        connection.supported_commands.add(cmd_can_mask_7ff)
         connection.supported_commands.add(cmd_2101)
+        connection.supported_commands.add(cmd_2102)
+        connection.supported_commands.add(cmd_2103)
+        connection.supported_commands.add(cmd_2104)
         connection.supported_commands.add(cmd_2105)
-        connection.supported_commands.add(odo)
+        connection.supported_commands.add(cmd_odometer)
+        connection.supported_commands.add(cmd_vin)
     
         # Print supported commands
         # DTC = Diagnostic Trouble Codes
         # MIL = Malfunction Indicator Lamp
-        #logger.debug(connection.print_commands())
+        logger.debug(connection.print_commands())
         
         logger.debug("*** Get battery status information ***")
         
-        # Set the CAN receive address to 7EC - Needed for next commands
-        atcra7ec = connection.query(can_receive_address_7ec)
+        # Set the CAN receive address to 7EC
+        connection.query(cmd_can_receive_address_7ec)
         
-        # 2101,2105 codes to get battery status information
+        # 2101 - 2105 codes to get battery status information
         raw_2101 = connection.query(cmd_2101)
+        raw_2102 = connection.query(cmd_2102)
+        raw_2103 = connection.query(cmd_2103)
+        raw_2104 = connection.query(cmd_2104)
         raw_2105 = connection.query(cmd_2105)
-    
+
         soh = bytes_to_int(raw_2105.value[27:29]) / 10.0
-        
+
         # Only create battery status data if got a consistent Status Of Health (sometimes it's not consistent)
         if (soh <= 100):
             data_battery = {}
             chargingBits = raw_2101.value[11]
-        
+            dcBatteryCurrent = bytes_to_int(raw_2101.value[12:14]) / 10.0
+            dcBatteryVoltage = bytes_to_int(raw_2101.value[14:16]) / 10.0
+            
+            cellTemps = [
+                bytes_to_int(raw_2101.value[18:19]), #  0
+                bytes_to_int(raw_2101.value[19:20]), #  1
+                bytes_to_int(raw_2101.value[20:21]), #  2
+                bytes_to_int(raw_2101.value[21:22]), #  3
+                bytes_to_int(raw_2101.value[22:23]), #  4
+                bytes_to_int(raw_2105.value[11:12]), #  5
+                bytes_to_int(raw_2105.value[12:13]), #  6
+                bytes_to_int(raw_2105.value[13:14]), #  7
+                bytes_to_int(raw_2105.value[14:15]), #  8
+                bytes_to_int(raw_2105.value[15:16]), #  9
+                bytes_to_int(raw_2105.value[16:17]), # 10
+                bytes_to_int(raw_2105.value[17:18])] # 11
+
+            cellVoltages = []
+            for cmd in [raw_2102, raw_2103, raw_2104]:
+                for byte in range(6,38):
+                    cellVoltages.append(cmd.value[byte] / 50.0)
+
+             
             data_battery.update({
                 'timestamp':                int(round(time.time())),
         
                 'soc_bms':                  raw_2101.value[6] / 2.0,
                 'soc_display':              int(raw_2105.value[33] / 2.0),
-        
+                'soh':                      soh,
+
                 'auxBatteryVoltage':        raw_2101.value[31] / 10.0,
-        
+
                 'charging':                 1 if chargingBits & 0x80 else 0,
                 'normalChargePort':         1 if chargingBits & 0x20 else 0,
                 'rapidChargePort':          1 if chargingBits & 0x40 else 0,
-        
-                'soh':                      soh,
-        
+
                 'fanStatus':                raw_2101.value[29],
                 'fanFeedback':              raw_2101.value[30],
-                
+
                 'cumulativeEnergyCharged':  bytes_to_int(raw_2101.value[40:44]) / 10.0,
                 'cumulativeEnergyDischarged': bytes_to_int(raw_2101.value[44:48]) / 10.0,
-        
+
                 'cumulativeChargeCurrent':  bytes_to_int(raw_2101.value[32:36]) / 10.0,
                 'cumulativeDischargeCurrent': bytes_to_int(raw_2101.value[36:40]) / 10.0,
-        
+
                 'availableChargePower':     bytes_to_int(raw_2101.value[7:9]) / 100.0,
                 'availableDischargePower':  bytes_to_int(raw_2101.value[9:11]) / 100.0,
+
+                'dcBatteryInletTemperature':  bytes_to_int(raw_2101.value[22:23]),
+                'dcBatteryMaxTemperature':    bytes_to_int(raw_2101.value[16:17]),
+                'dcBatteryMinTemperature':    bytes_to_int(raw_2101.value[17:18]),
+                'dcBatteryCurrent':         dcBatteryCurrent,
+                'dcBatteryPower':           dcBatteryCurrent * dcBatteryVoltage / 1000.0,
+                'dcBatteryVoltage':         dcBatteryVoltage,
+                'dcBatteryAvgTemperature':    sum(cellTemps) / len(cellTemps),
+
+                'driveMotorSpeed':          bytes_to_int(raw_2101.value[55:57]) * (1 / 0.621371192) / 100.0 # In mph so convert to Km/h -> TODO check if its correct
                 })
+        
+            for i,temp in enumerate(cellTemps):
+                key = "dcBatteryCellTemp{:02d}".format(i+1)
+                data_battery[key] = float(temp)
+    
+            for i,cvolt in enumerate(cellVoltages):
+                key = "dcBatteryCellVoltage{:02d}".format(i+1)
+                data_battery[key] = float(cvolt)
+
+            try:
+                logger.debug("*** Get Vehicle Identification Number ***")
+                # Set the CAN receive address to 7EA
+                connection.query(cmd_can_receive_address_7ea)
+                # Query VIN
+                vin_value = connection.query(cmd_vin)
+                logger.info("Got Vehicle Identification Number")
+                data_battery['vin'] = "{}".format(vin_value)
+            except (ValueError, CanError) as err:
+                logger.warning("Error getting VIN: {}".format(err), exc_info=False)
 
             logger.info("Got battery data")
 
@@ -248,15 +356,17 @@ if __name__ == '__main__':
             mqtt_msgs.extend([{'topic':topic_prefix + "battery", 'payload':json.dumps(data_battery), 'qos':0, 'retain':True}])
         else:
             logger.error("Got inconsistent data for battery Status Of Health: {}%".format(soh))
-    
+
         try:
             logger.debug("*** Get odometer information ***")
+            # Set the CAN receive address to 7EC
+            connection.query(cmd_can_receive_address_7ec)
             # Sets the ID filter to 7EC
-            atcf7ce = connection.query(can_filter_7ce)
+            connection.query(cmd_can_filter_7ce)
             # Sets the ID mask to 7FF
-            atcm7ff = connection.query(can_mask_7ff)
+            connection.query(cmd_can_mask_7ff)
             # Query odometer
-            odometer_value = connection.query(odo)
+            odometer_value = connection.query(cmd_odometer)
         except (ValueError, CanError) as err:
             logger.warning("Error getting odometer value: {}".format(err), exc_info=False) # Not available when car engine is off
 

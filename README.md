@@ -396,22 +396,33 @@ Battery information is published from `battery_data.py` script in the `config['m
 
 ```
 {
-   availableChargePower         float. Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   cumulativeChargeCurrent      float. Cumulative current charged in A.
    timestamp                    float. Linux Epoch time.
-   cumulativeDischargeCurrent   float. Cumulative current discharged in A.
-   cumulativeEnergyDischarged   float. Cumulative energy discharged in kWh.
-   soc_bms                      float (0-100). Baterry status of charge in % (as seen by Battery Management System).
-   cumulativeEnergyCharged      float. Cumulative energy charged in kWh.
-   rapidChargePort              0 or 1. Is charging using rapid charge port? 0: false, 1: true.
-   availableDischargePower      float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   auxBatteryVoltage            float. Voltage of the aux battery in V. (12V battery).
-   fanFeedback                  integer. Fan feedback signal in Hz.
-   normalChargePort             0 or 1. Is charging using normal charge port? 0: false, 1: true.
+   soc_bms                      float (0-100). Battery status of charge in % (as seen by Battery Management System).
    soc_display                  integer (0-100). Battery status of charge in % (as seen as in car display).
    soh                          float (0-100). Battery status of health in %.
-   fanStatus                    integer (0-9). Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
+   auxBatteryVoltage            float. Aux battery voltage in V.
    charging                     0 or 1. Is the car charging ? 0: false, 1: true.
+   normalChargePort             0 or 1. Is charging using normal charge port? 0: false, 1: true.
+   rapidChargePort              0 or 1. Is charging using rapid charge port? 0: false, 1: true.
+   fanStatus                    integer (0-9). Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
+   fanFeedback                  integer. Fan feedback signal in Hz.
+   cumulativeEnergyCharged      float. Cumulative energy charged in kWh.
+   cumulativeEnergyDischarged   float. Cumulative energy discharged in kWh.
+   cumulativeChargeCurrent      float. Cumulative current charged in A.
+   cumulativeDischargeCurrent   float. Cumulative current discharged in A.
+   availableChargePower         float. Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   availableDischargePower      float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   dcBatteryInletTemperature    integer. DC battery inlet temperature in ºC.
+   dcBatteryMaxTemperature      integer. DC battery maximum cell temperature in ºC.
+   dcBatteryMinTemperature      integer. DC battery minimum cell temperature in ºC.
+   dcBatteryAvgTemperature      integer. DC battery average cells temperature in ºC.
+   dcBatteryCurrent             float. DC battery instant current in A.
+   dcBatteryPower               float. DC battery instant power in kW.
+   dcBatteryVoltage             float. DC battery instant  voltage in V.
+   dcBatteryCellTempxx          float. DC battery cell temperature in ºC. Where xx goes from 01 to 12.
+   dcBatteryCellVoltagexx       float. DC battery cell voltage in V. Where xx goes from 01 to 96.
+   driveMotorSpeed              float. Speed in Km/h.
+   vin                          string. Vehicle Identification Number (Número de bastidor in spanish).
 }
 ```
 
