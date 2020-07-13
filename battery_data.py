@@ -78,7 +78,7 @@ def vin(can_message):
 # Publish all messages to MQTT
 def publish_data_mqtt(msgs):
     try:
-        logger.debug("*** Publish to MQTT ***")
+        logger.info("Publish messages to MQTT")
         for msg in msgs:
             logger.info("{}".format(msg))
 
@@ -254,7 +254,7 @@ if __name__ == '__main__':
         # MIL = Malfunction Indicator Lamp
         logger.debug(connection.print_commands())
         
-        logger.debug("*** Get battery status information ***")
+        logger.info("Querying for battery information")
         
         # Set the CAN receive address to 7EC
         connection.query(cmd_can_receive_address_7ec)
@@ -339,18 +339,22 @@ if __name__ == '__main__':
                 key = "dcBatteryCellVoltage{:02d}".format(i+1)
                 data_battery[key] = float(cvolt)
 
+            logger.info("Got battery information")
+
             try:
-                logger.debug("*** Get Vehicle Identification Number ***")
+                logger.info("Querying for Vehicle Identification Number")
                 # Set the CAN receive address to 7EA
                 connection.query(cmd_can_receive_address_7ea)
                 # Query VIN
                 vin_value = connection.query(cmd_vin)
                 logger.info("Got Vehicle Identification Number")
-                data_battery['vin'] = "{}".format(vin_value)
+                if 'vin_value' in locals() and vin_value is not None and vin_value.value is not None:
+                    data_battery['vin'] = vin_value.value
+                else:
+                    logger.warning("Vehicle Identification Number doesn't exist or is None")
             except (ValueError, CanError) as err:
-                logger.warning("Error getting VIN: {}".format(err), exc_info=False)
+                logger.warning("Error getting Vehicle Identification Number: {}".format(err), exc_info=False)
 
-            logger.info("Got battery data")
 
             # Add battery data messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "battery", 'payload':json.dumps(data_battery), 'qos':0, 'retain':True}])
@@ -358,7 +362,7 @@ if __name__ == '__main__':
             logger.error("Got inconsistent data for battery Status Of Health: {}%".format(soh))
 
         try:
-            logger.debug("*** Get odometer information ***")
+            logger.info("Querying for odometer")
             # Set the CAN receive address to 7EC
             connection.query(cmd_can_receive_address_7ec)
             # Sets the ID filter to 7EC
