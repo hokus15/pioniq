@@ -19,8 +19,6 @@ class ConnectionError(Exception): pass
 
 class CanError(Exception): pass
 
-class NoData(Exception): pass
-
 # CAN response decoder
 def can_response(can_message):
     data = None
@@ -256,7 +254,7 @@ if __name__ == '__main__':
             atcm7ff = connection.query(can_mask_7ff)
             # Query odometer
             odometer_value = connection.query(odo)
-        except (ValueError, CanError, NoData) as err:
+        except (ValueError, CanError) as err:
             logger.warning("Error getting odometer value: {}".format(err), exc_info=False) # Not available when car engine is off
 
         # Only set odometer data if present
@@ -270,8 +268,6 @@ if __name__ == '__main__':
         logger.error("Error found: {0}".format(err), exc_info=False)
     except CanError as err:
         logger.error("Error found reading CAN response: {0}".format(err), exc_info=False)
-    except NoData as err:
-        logger.error("No data returned by OBDII: {0}".format(err), exc_info=False)
     except Exception as ex:
         logger.error("Unexpected error: {}".format(ex), exc_info=False)
     finally:
