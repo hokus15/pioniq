@@ -298,8 +298,8 @@ if __name__ == '__main__':
             data_battery.update({
                 'timestamp':                int(round(time.time())),
         
-                'soc_bms':                  raw_2101.value[6] / 2.0,
-                'soc_display':              int(raw_2105.value[33] / 2.0),
+                'socBms':                  raw_2101.value[6] / 2.0,
+                'socDisplay':              int(raw_2105.value[33] / 2.0),
                 'soh':                      soh,
 
                 'auxBatteryVoltage':        raw_2101.value[31] / 10.0,
@@ -328,11 +328,11 @@ if __name__ == '__main__':
                 'dcBatteryVoltage':         dcBatteryVoltage,
                 'dcBatteryAvgTemperature':    sum(cellTemps) / len(cellTemps),
 
-                'driveMotorSpeed':          bytes_to_int(raw_2101.value[55:57]) * (1 / 0.621371192) / 100.0 # In mph so convert to Km/h -> TODO check if its correct
+                'driveMotorSpeed':          bytes_to_int(raw_2101.value[55:57]) # In mph so convert to Km/h -> TODO check if its correct
                 })
         
             for i,temp in enumerate(cellTemps):
-                key = "dcBatteryCellTemp{:02d}".format(i+1)
+                key = "dcBatteryModuleTemp{:02d}".format(i+1)
                 data_battery[key] = float(temp)
     
             for i,cvolt in enumerate(cellVoltages):
