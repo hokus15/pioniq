@@ -421,7 +421,7 @@ Battery information is published from `battery_data.py` script in the `config['m
    dcBatteryVoltage             float. DC battery instant  voltage in V.
    dcBatteryModuleTempxx        float. DC battery module temperature in ºC. Where xx goes from 01 to 12.
    dcBatteryCellVoltagexx       float. DC battery cell voltage in V. Where xx goes from 01 to 96.
-   driveMotorSpeed              float. Speed in Km/h.
+   driveMotorSpeed              integer. Motor speed in RPM.
    vin                          string. Vehicle Identification Number (Número de bastidor in spanish).
 }
 ```
