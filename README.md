@@ -559,8 +559,7 @@ Sample:
    "dcBatteryCellVoltage94":3.6,
    "dcBatteryCellVoltage95":3.6,
    "dcBatteryCellVoltage96":3.6,
-   "driveMotorSpeed":4200,
-   "vin":"XXXXXXXXXXXXXXXXXX"
+   "driveMotorSpeed":4200
 }
 ```
 
