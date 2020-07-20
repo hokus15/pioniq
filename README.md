@@ -644,4 +644,5 @@ All this work has been possible by putting together different pieces like:
 - [python-OBD](https://github.com/brendan-w/python-OBD/tree/master/obd)
 - [EVNotiPi](https://github.com/EVNotify/EVNotiPi)
 - [OBD-PIDs-for-HKMC-EVs](https://github.com/JejuSoul/OBD-PIDs-for-HKMC-EVs)
+- [SoulEVSpy](https://github.com/langemand/SoulEVSpy)
 - and of course lot of patience and [Google](https://www.google.com/)
