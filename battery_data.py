@@ -153,39 +153,49 @@ def query_battery_information():
                 cellVoltages.append(cmd.value[byte] / 50.0)
 
         battery_info.update({
-            'timestamp':                  int(round(time.time())),
-    
-            'socBms':                     raw_2101.value[6] / 2.0,
-            'socDisplay':                 int(raw_2105.value[33] / 2.0),
-            'soh':                        soh,
+            'timestamp':                       int(round(time.time())),
 
-            'auxBatteryVoltage':          raw_2101.value[31] / 10.0,
+            'socBms':                          raw_2101.value[6] / 2.0, # %
+            'socDisplay':                      int(raw_2105.value[33] / 2.0), # %
+            'soh':                             soh, # %
 
-            'charging':                   1 if chargingBits & 0x80 else 0,
-            'normalChargePort':           1 if chargingBits & 0x20 else 0,
-            'rapidChargePort':            1 if chargingBits & 0x40 else 0,
+            'bmsIgnition':                     1 if raw_2101.value[52] & 0x4 else 0, # 3rd bit is 1 
+            'bmsMainRelay':                    1 if chargingBits & 0x1 else 0, # 1st bit is 1 
+            'auxBatteryVoltage':               raw_2101.value[31] / 10.0, # V
 
-            'fanStatus':                  raw_2101.value[29],
-            'fanFeedback':                raw_2101.value[30],
+            'charging':                        1 if chargingBits & 0x80 else 0, # 8th bit is 1
+            'normalChargePort':                1 if chargingBits & 0x20 else 0, # 6th bit is 1
+            'rapidChargePort':                 1 if chargingBits & 0x40 else 0, # 7th bit is 1
 
-            'cumulativeEnergyCharged':    bytes_to_int(raw_2101.value[40:44]) / 10.0,
-            'cumulativeEnergyDischarged': bytes_to_int(raw_2101.value[44:48]) / 10.0,
+            'fanStatus':                       raw_2101.value[29], # Hz
+            'fanFeedback':                     raw_2101.value[30],
 
-            'cumulativeChargeCurrent':    bytes_to_int(raw_2101.value[32:36]) / 10.0,
-            'cumulativeDischargeCurrent': bytes_to_int(raw_2101.value[36:40]) / 10.0,
+            'cumulativeEnergyCharged':         bytes_to_int(raw_2101.value[40:44]) / 10.0, # kWh
+            'cumulativeEnergyDischarged':      bytes_to_int(raw_2101.value[44:48]) / 10.0, # kWh
 
-            'availableChargePower':       bytes_to_int(raw_2101.value[7:9]) / 100.0,
-            'availableDischargePower':    bytes_to_int(raw_2101.value[9:11]) / 100.0,
+            'cumulativeChargeCurrent':         bytes_to_int(raw_2101.value[32:36]) / 10.0, # A
+            'cumulativeDischargeCurrent':      bytes_to_int(raw_2101.value[36:40]) / 10.0, # A
 
-            'dcBatteryInletTemperature':  bytes_to_int(raw_2101.value[22:23]),
-            'dcBatteryMaxTemperature':    bytes_to_int(raw_2101.value[16:17]),
-            'dcBatteryMinTemperature':    bytes_to_int(raw_2101.value[17:18]),
-            'dcBatteryCurrent':           dcBatteryCurrent,
-            'dcBatteryPower':             dcBatteryCurrent * dcBatteryVoltage / 1000.0,
-            'dcBatteryVoltage':           dcBatteryVoltage,
-            'dcBatteryAvgTemperature':    sum(cellTemps) / len(cellTemps),
+            'cumulativeOperatingTime':         bytes_to_int(raw_2101.value[48:52]), # seconds 
 
-            'driveMotorSpeed':          bytes_to_int(raw_2101.value[55:57])
+            'availableChargePower':            bytes_to_int(raw_2101.value[7:9]) / 100.0, # kW
+            'availableDischargePower':         bytes_to_int(raw_2101.value[9:11]) / 100.0, # kW
+
+            'dcBatteryCellVoltageDeviation':   raw_2105.value[22] / 50, # V 
+            'dcBatteryHeater1Temperature':     float(raw_2105.value[25]), # C 
+            'dcBatteryHeater2Temperature':     float(raw_2105.value[26]), # C 
+            'dcBatteryInletTemperature':       bytes_to_int(raw_2101.value[22:23]), # C
+            'dcBatteryMaxTemperature':         bytes_to_int(raw_2101.value[16:17]), # C
+            'dcBatteryMinTemperature':         bytes_to_int(raw_2101.value[17:18]), # C
+            'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
+            'dcBatteryCellMinDeterioration':   bytes_to_int(raw_2105.value[30:32]) / 10.0, # %
+            'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
+            'dcBatteryCurrent':                dcBatteryCurrent, # A
+            'dcBatteryPower':                  dcBatteryCurrent * dcBatteryVoltage / 1000.0, # kW
+            'dcBatteryVoltage':                dcBatteryVoltage, # V
+            'dcBatteryAvgTemperature':         sum(cellTemps) / len(cellTemps), # C
+
+            'driveMotorSpeed':                 bytes_to_int(raw_2101.value[55:57]) # RPM
             })
     
         for i,temp in enumerate(cellTemps):
