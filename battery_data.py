@@ -88,7 +88,7 @@ def obd_connect():
         connection_retries += 1
     
     if obd_connection.status() != OBDStatus.CAR_CONNECTED:
-        raise ConnectionError(connection.status())
+        raise ConnectionError(obd_connection.status())
     else:
         return obd_connection
 
