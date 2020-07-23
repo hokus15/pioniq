@@ -85,7 +85,7 @@ def obd_connect():
         if obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED:
             logger.warning("{0}. Retrying in {1} second(s) ({1})...".format(obd_connection.status(), connection_retries))
             time.sleep(connection_retries)
-        connection_retries += connection_retries
+        connection_retries += 1
     
     if obd_connection.status() != OBDStatus.CAR_CONNECTED:
         raise ConnectionError(connection.status())
@@ -106,7 +106,7 @@ def query_command(command):
             time.sleep(command_retries)
         if command_retries >= MAX_RETRIES:
             raise ValueError("No valid response for {}. Max retries ({}) exceeded.".format(command, MAX_RETRIES))
-        command_retries += command_retries
+        command_retries += 1
     logger.debug("{} got response".format(command))
     return cmd_response
 
