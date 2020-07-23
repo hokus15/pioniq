@@ -103,7 +103,7 @@ def query_command(command):
             exception = True
         valid_response = not(cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception)
         if not valid_response and command_count < MAX_RETRIES:
-            logger.warning("No valid response for {}. Retrying in {} second(s)...)".format(command, command_count))
+            logger.warning("No valid response for {}. Retrying in {} second(s)...".format(command, command_count))
             time.sleep(command_count)
 
     if not valid_response:
