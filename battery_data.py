@@ -461,5 +461,6 @@ if __name__ == '__main__':
         logger.error("Unexpected error: {}".format(ex), exc_info=False)
     finally:
         publish_data_mqtt(mqtt_msgs)
-        connection.close()
+        if 'connection' in locals() and connection is not None:
+            connection.close()
         logger.info("===  Script end  ===")
