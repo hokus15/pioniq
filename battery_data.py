@@ -75,38 +75,38 @@ def vin(can_message):
     return vin_str
 
 def obd_connect():
-    connection_retries = 1
+    connection_count = 0
     obd_connection = None
     while obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED:
+        connection_count += 1
+        if connection_count > MAX_RETRIES:
+            break
         # Establish connection with OBDII dongle
         obd_connection = obd.OBD(portstr=config['serial']['port'], baudrate=int(config['serial']['baudrate']), fast=False, timeout=30)
-        if connection_retries >= MAX_RETRIES:
-            break
         if obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED:
-            logger.warning("{0}. Retrying in {1} second(s) ({1})...".format(obd_connection.status(), connection_retries))
-            time.sleep(connection_retries)
-        connection_retries += 1
-    
+            logger.warning("{0}. Retrying in {1} second(s) ({1})...".format(obd_connection.status(), connection_count))
+            time.sleep(connection_count)
+
     if obd_connection.status() != OBDStatus.CAR_CONNECTED:
         raise ConnectionError(obd_connection.status())
     else:
         return obd_connection
 
 def query_command(command):
-    command_retries = 1
+    command_count = 0
     cmd_response = None
     exception = False
     while cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception:
+        command_count += 1
+        if command_count > MAX_RETRIES:
+            raise ValueError("No valid response for {}. Max retries ({}) exceeded.".format(command, MAX_RETRIES))
         try:
             cmd_response = connection.query(command)
         except Exception as ex:
             exception = True
         if cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception:
-            logger.info("No valid response for {0}. Retrying in {1} second(s)...({1})".format(command, command_retries))
-            time.sleep(command_retries)
-        if command_retries >= MAX_RETRIES:
-            raise ValueError("No valid response for {}. Max retries ({}) exceeded.".format(command, MAX_RETRIES))
-        command_retries += 1
+            logger.info("No valid response for {0}. Retrying in {1} second(s)...({1})".format(command, command_count))
+            time.sleep(command_count)
     logger.debug("{} got response".format(command))
     return cmd_response
 
@@ -218,7 +218,7 @@ def query_odometer():
     if 'odometer' in locals() and odometer is not None and odometer.value is not None:
         logger.info("**** Got odometer value ****")
     else:
-        raise ValueError("Odometer value doesn't exist or is None")
+        raise ValueError("Could not get odometer value")
     return odometer.value
 
 
@@ -235,9 +235,9 @@ def query_vmcu_information():
     }
     if 'vin' in locals() and vin is not None and vin.value is not None:
         logger.info("**** Got Vehicle Identification Number ****")
-        vmcu_info['vin'] = vin_value.value
+        vmcu_info['vin'] = vin.value
     else:
-        raise ValueError("Vehicle Identification Number doesn't exist or is None")
+        raise ValueError("Could not get Vehicle Identification Number")
     return vmcu_info
 
 # Publish all messages to MQTT
@@ -449,7 +449,6 @@ if __name__ == '__main__':
             mqtt_msgs.extend([{'topic':topic_prefix + "odometer", 'payload':query_odometer(), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
             logger.warning("**** Error querying odometer: {} ****".format(err), exc_info=False)
-
 
     except ConnectionError as err:
         logger.error("OBDII connection error: {0}".format(err), exc_info=False)
