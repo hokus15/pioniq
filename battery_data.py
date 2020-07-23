@@ -77,14 +77,12 @@ def vin(can_message):
 def obd_connect():
     connection_count = 0
     obd_connection = None
-    while obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED:
+    while (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < MAX_RETRIES:
         connection_count += 1
-        if connection_count > MAX_RETRIES:
-            break
         # Establish connection with OBDII dongle
         obd_connection = obd.OBD(portstr=config['serial']['port'], baudrate=int(config['serial']['baudrate']), fast=False, timeout=30)
-        if obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED:
-            logger.warning("{0}. Retrying in {1} second(s) ({1})...".format(obd_connection.status(), connection_count))
+        if (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < MAX_RETRIES:
+            logger.warning("{}. Retrying in {} second(s)...".format(obd_connection.status(), connection_count))
             time.sleep(connection_count)
 
     if obd_connection.status() != OBDStatus.CAR_CONNECTED:
@@ -96,19 +94,23 @@ def query_command(command):
     command_count = 0
     cmd_response = None
     exception = False
-    while cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception:
+    valid_response = False
+    while not valid_response and command_count < MAX_RETRIES:
         command_count += 1
-        if command_count > MAX_RETRIES:
-            raise ValueError("No valid response for {}. Max retries ({}) exceeded.".format(command, MAX_RETRIES))
         try:
             cmd_response = connection.query(command)
         except Exception as ex:
             exception = True
-        if cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception:
-            logger.info("No valid response for {0}. Retrying in {1} second(s)...({1})".format(command, command_count))
+        valid_response = not(cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception)
+        if not valid_response and command_count < MAX_RETRIES:
+            logger.warning("No valid response for {}. Retrying in {} second(s)...)".format(command, command_count))
             time.sleep(command_count)
-    logger.debug("{} got response".format(command))
-    return cmd_response
+
+    if not valid_response:
+        raise ValueError("No valid response for {}. Max retries ({}) exceeded.".format(command, MAX_RETRIES))
+    else:
+        logger.debug("{} got response".format(command))
+        return cmd_response
 
 def query_battery_information():
     logger.info("**** Querying battery information ****")
