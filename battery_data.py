@@ -440,7 +440,7 @@ if __name__ == '__main__':
 
         try:
             # Add VIN to MQTT messages array
-            mqtt_msgs.extend([{'topic':topic_prefix + "vmcu", 'payload':query_vmcu_information(), 'qos':0, 'retain':True}])
+            mqtt_msgs.extend([{'topic':topic_prefix + "vmcu", 'payload':json.dumps(query_vmcu_information()), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
             logger.warning("**** Error querying vmcu information: {} ****".format(err), exc_info=False)
 
