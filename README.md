@@ -398,32 +398,40 @@ BMS (Battery Management System) information is published from `battery_data.py` 
 
 ```
 {
-   timestamp                  integer. Linux Epoch time.
-   socBms                     float (0-100). Battery status of charge in % (as seen by Battery Management System).
-   socDisplay                 integer (0-100). Battery status of charge in % (as seen as in car display).
-   soh                        float (0-100). Battery status of health in %.
-   auxBatteryVoltage          float. Aux battery voltage in V.
-   charging                   0 or 1. Is the car charging ? 0: false, 1: true.
-   normalChargePort           0 or 1. Is charging using normal charge port? 0: false, 1: true.
-   rapidChargePort            0 or 1. Is charging using rapid charge port? 0: false, 1: true.
-   fanStatus                  integer (0-9). Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
-   fanFeedback                integer. Fan feedback signal in Hz.
-   cumulativeEnergyCharged    float. Cumulative energy charged in kWh.
-   cumulativeEnergyDischarged float. Cumulative energy discharged in kWh.
-   cumulativeChargeCurrent    float. Cumulative current charged in A.
-   cumulativeDischargeCurrent float. Cumulative current discharged in A.
-   availableChargePower       float. Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   availableDischargePower    float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   dcBatteryInletTemperature  integer. DC battery inlet temperature in ºC.
-   dcBatteryMaxTemperature    integer. DC battery maximum cell temperature in ºC.
-   dcBatteryMinTemperature    integer. DC battery minimum cell temperature in ºC.
-   dcBatteryAvgTemperature    integer. DC battery average cells temperature in ºC.
-   dcBatteryCurrent           float. DC battery instant current in A.
-   dcBatteryPower             float. DC battery instant power in kW.
-   dcBatteryVoltage           float. DC battery instant  voltage in V.
-   dcBatteryModuleTempxx      float. DC battery module temperature in ºC. Where xx goes from 01 to 12.
-   dcBatteryCellVoltagexx     float. DC battery cell voltage in V. Where xx goes from 01 to 96.
-   driveMotorSpeed            integer. Motor speed in RPM.
+   timestamp                       integer. Linux Epoch time.
+   socBms                          float (0-100). Battery status of charge in % (as seen by Battery Management System).
+   socDisplay                      integer (0-100). Battery status of charge in % (as seen as in car display).
+   soh                             float (0-100). Battery status of health in %.
+   bmsIgnition                     0 or 1. Car ignition. 0: false, 1: true.
+   bmsMainRelay                    0 or 1. BMS main relay. 0: false, 1: true.
+   auxBatteryVoltage               float. Aux battery voltage in V.
+   charging                        0 or 1. Is the car charging ? 0: false, 1: true.
+   normalChargePort                0 or 1. Is charging using normal charge port? 0: false, 1: true.
+   rapidChargePort                 0 or 1. Is charging using rapid charge port? 0: false, 1: true.
+   fanStatus                       integer (0-9). Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
+   fanFeedback                     integer. Fan feedback signal in Hz.
+   cumulativeEnergyCharged         float. Cumulative energy charged in kWh.
+   cumulativeEnergyDischarged      float. Cumulative energy discharged in kWh.
+   cumulativeChargeCurrent         float. Cumulative current charged in A.
+   cumulativeDischargeCurrent      float. Cumulative current discharged in A.
+   availableChargePower            float. Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   availableDischargePower         float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   dcBatteryCellVoltageDeviation   integer. DC battery cell voltage deviation in V.
+   dcBatteryHeater1Temperature     float. DC battery heater1 temperature in ºC.
+   dcBatteryHeater2Temperature     float. DC battery heater2 temperature in ºC.
+   dcBatteryInletTemperature       integer. DC battery inlet temperature in ºC.
+   dcBatteryMaxTemperature         integer. DC battery maximum cell temperature in ºC.
+   dcBatteryMinTemperature         integer. DC battery minimum cell temperature in ºC.
+   dcBatteryAvgTemperature         integer. DC battery average cells temperature in ºC.
+   dcBatteryCellNoMaxDeterioration integer. DC battery maximium deterioration cell number.
+   dcBatteryCellMinDeterioration   integer. DC battery minimum deterioration cell number.
+   dcBatteryCellNoMinDeterioration float. DC battery minimum deterioration cell in %.
+   dcBatteryCurrent                float. DC battery instant current in A.
+   dcBatteryPower                  float. DC battery instant power in kW.
+   dcBatteryVoltage                float. DC battery instant  voltage in V.
+   dcBatteryModuleTempxx           float. DC battery module temperature in ºC. Where xx goes from 01 to 12.
+   dcBatteryCellVoltagexx          float. DC battery cell voltage in V. Where xx goes from 01 to 96.
+   driveMotorSpeed                 integer. Motor speed in RPM.
 }
 ```
 
@@ -434,6 +442,8 @@ Sample:
    "socBms":45.0,
    "socDisplay":46,
    "soh":100.0,
+   "bmsIgnition": 1,
+   "bmsMainRelay": 1,
    "auxBatteryVoltage":14.5,
    "charging":0,
    "normalChargePort":0,
@@ -446,10 +456,16 @@ Sample:
    "cumulativeDischargeCurrent":8372.3,
    "availableChargePower":98.0,   
    "availableDischargePower":98.0,
+   "dcBatteryCellVoltageDeviation": 0,
+   "dcBatteryHeater2Temperature": 0.0,
+   "dcBatteryHeater1Temperature": 0.0,
    "dcBatteryInletTemperature":27,
    "dcBatteryMaxTemperature":28,
    "dcBatteryMinTemperature":26,
    "dcBatteryAvgTemperature":27,
+   "dcBatteryCellNoMaxDeterioration": 2,
+   "dcBatteryCellMinDeterioration": 100.0,
+   "dcBatteryCellNoMinDeterioration": 10,
    "dcBatteryCurrent":1.7,
    "dcBatteryPower":0.5924499999999999,
    "dcBatteryVoltage":348.5,
