@@ -20,6 +20,8 @@ This is my first python programming experience and I'm not a Linux expert so I'm
 - [Raspberry Pi Zero case](https://www.amazon.es/Gaoominy-Caja-para-Raspberry-Zero/dp/B07QV5RXCN/ref=sr_1_10?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2PS8DPO5AEH1F&dchild=1&keywords=caja+raspberry+pi+zero&qid=1593189549&s=electronics&sprefix=caja+rasp%2Celectronics%2C181&sr=1-10)
 - [Velcro stickers](https://www.amazon.es/gp/product/B00P94TB52/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
 
+- [Amazon wishlist](https://www.amazon.es/hz/wishlist/ls/WO5Z2VX24HGJ?ref_=wl_share)
+
 ## Setup of Raspberry Pi Zero W
 ### Install the OS
 If you are new to Raspberry Pi, you should get some information about it [here](https://www.raspberrypi.org/).
