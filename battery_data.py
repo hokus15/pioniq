@@ -74,6 +74,23 @@ def vin(can_message):
         vin_str = vin_str + chr(bytes_to_int(raw_vin[v:v+1]))
     return vin_str
 
+def gear(can_message): 
+    gear_str = ""
+    raw_gear = can_response(can_message)
+    gear_bits = raw_gear[7]
+    #logger.debug("Gear:{} - {} - {}".format('{0:08b}'.format(gear_bits),gear_bits, hex(gear_bits)))
+    if gear_bits & 0x1: # 1st bit is 1
+        gear_str = gear_str + "P" 
+    if gear_bits & 0x2: # 2nd bit is 1
+        gear_str = gear_str + "R"
+    if gear_bits & 0x4: # 3rd bit is 1
+        gear_str = gear_str + "N"
+    if gear_bits & 0x8: # 4th bit is 1
+        gear_str = gear_str + "D"
+    if gear_bits & 0x10: # 5th bit is 1
+        gear_str = gear_str + "B"
+    return gear_str
+
 def obd_connect():
     connection_count = 0
     obd_connection = None
@@ -218,7 +235,7 @@ def query_odometer():
     logger.info("**** Querying for odometer ****")
     # Set the CAN receive address to 7EC
     query_command(cmd_can_receive_address_7ec)
-    # Sets the ID filter to 7EC
+    # Sets the ID filter to 7CE
     query_command(cmd_can_filter_7ce)
     # Sets the ID mask to 7FF
     query_command(cmd_can_mask_7ff)
@@ -235,21 +252,30 @@ def query_odometer():
 
 
 def query_vmcu_information():
-    logger.info("**** Querying for Vehicle Identification Number ****")
+    logger.info("**** Querying for VMCU information ****")
+    vmcu_info = {
+        'timestamp': int(round(time.time()))
+    }
+
     # Set the CAN receive address to 7EA
     query_command(cmd_can_receive_address_7ea)
     # Set header to 7E2
     query_command(cmd_can_header_7e2)
     # Query VIN
     vin = query_command(cmd_vin)
-    vmcu_info = {
-        'timestamp': int(round(time.time()))
-    }
     if 'vin' in locals() and vin is not None and vin.value is not None:
         logger.info("**** Got Vehicle Identification Number ****")
         vmcu_info['vin'] = vin.value
     else:
         raise ValueError("Could not get Vehicle Identification Number")
+    # Query gear stick position
+    gear = query_command(cmd_vmcu_2101)
+    if 'gear' in locals() and gear is not None and gear.value is not None:
+        logger.info("**** Got gear stick position ****")
+        vmcu_info['gear'] = gear.value
+    else:
+        raise ValueError("Could not get gear stick position")
+
     return vmcu_info
 
 # Publish all messages to MQTT
@@ -424,6 +450,14 @@ if __name__ == '__main__':
                             ECU.ALL,
                             False)
 
+        cmd_vmcu_2101 = OBDCommand("2101",
+                            "Extended command - VMCU information",
+                            b"2101",
+                            0,
+                            gear,
+                            ECU.ALL,
+                            False)
+
         # Add defined commands to supported commands
         connection.supported_commands.add(cmd_can_receive_address_7ec)
         connection.supported_commands.add(cmd_can_receive_address_7ea)
@@ -438,6 +472,7 @@ if __name__ == '__main__':
         connection.supported_commands.add(cmd_bms_2105)
         connection.supported_commands.add(cmd_odometer)
         connection.supported_commands.add(cmd_vin)
+        connection.supported_commands.add(cmd_vmcu_2101)
     
         # Print supported commands
         # DTC = Diagnostic Trouble Codes
@@ -451,7 +486,7 @@ if __name__ == '__main__':
             logger.warning("**** Error querying battery information: {} ****".format(err), exc_info=False)
 
         try:
-            # Add VIN to MQTT messages array
+            # Add VMCU information to MQTT messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "vmcu", 'payload':json.dumps(query_vmcu_information()), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
             logger.warning("**** Error querying vmcu information: {} ****".format(err), exc_info=False)

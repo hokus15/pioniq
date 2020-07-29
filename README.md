@@ -578,6 +578,7 @@ Vehicle Motor Control System information is published from `battery_data.py` scr
 {
    timestamp integer. Linux Epoch time.
    vin       string. Vehicle Identification Number, also called a chassis number (or número de bastidor in spanish).
+   gear      string. Gear stick position. P = Park, N = Neutral, D = Drive, R = Rear or B = engine braking
 }
 ```
 
@@ -585,7 +586,8 @@ Sample:
 ```
 {
    "timestamp":1594994497,
-   "vin":"XXXXXXXXXXXXXXXXXX"
+   "vin":"XXXXXXXXXXXXXXXXXX",
+   "gear": "P"
 }
 ```
 
