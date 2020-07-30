@@ -74,6 +74,7 @@ def vin(can_message):
         vin_str = vin_str + chr(bytes_to_int(raw_vin[v:v+1]))
     return vin_str
 
+# Gear stick decoder
 def gear(can_message): 
     gear_str = ""
     raw_gear = can_response(can_message)
@@ -134,7 +135,9 @@ def query_battery_information():
 
     # Set the CAN receive address to 7EC
     query_command(cmd_can_receive_address_7ec)
-        
+    # Sets the ID mask to 7FF
+    query_command(cmd_can_mask_7ff)
+
     # 2101 - 2105 codes to get battery status information
     raw_2101 = query_command(cmd_bms_2101)
     raw_2102 = query_command(cmd_bms_2102)
@@ -261,6 +264,8 @@ def query_vmcu_information():
     query_command(cmd_can_receive_address_7ea)
     # Set header to 7E2
     query_command(cmd_can_header_7e2)
+    # Sets the ID mask to 7FF
+    query_command(cmd_can_mask_7ff)
     # Query VIN
     vin = query_command(cmd_vin)
     if 'vin' in locals() and vin is not None and vin.value is not None:
@@ -277,6 +282,40 @@ def query_vmcu_information():
         raise ValueError("Could not get gear stick position")
 
     return vmcu_info
+
+def query_tpms_information():
+    logger.info("**** Querying for TPMS information ****")
+    tpms_info = {
+        'timestamp': int(round(time.time()))
+    }
+
+    # Set the CAN receive address to 7A8
+    query_command(cmd_can_receive_address_7a8)
+    # Set header to 7A0
+    query_command(cmd_can_header_7a0)
+    # Sets the ID mask to 7FF
+    query_command(cmd_can_mask_7ff)
+    # Query TPMS
+    tpms = query_command(cmd_tpms_22c00b)
+    if 'tpms' in locals() and tpms is not None and tpms.value is not None:
+        tpms_info.update({
+            'tire_1_pressure':    tpms.value[7] * 0.2, # psi
+            'tire_1_temperature': tpms.value[8] - 55, # C
+            
+            'tire_2_pressure':    tpms.value[11] * 0.2, # psi
+            'tire_2_temperature': tpms.value[12] - 55, # C
+            
+            'tire_3_pressure':    tpms.value[15] * 0.2, # psi
+            'tire_3_temperature': tpms.value[16] - 55, # C
+            
+            'tire_4_pressure':    tpms.value[19] * 0.2, # psi
+            'tire_4_temperature': tpms.value[20] - 55, # C
+            })
+#        for i in range(0, len(tpms.value)):
+#            logger.debug("Data[{}]:{} - {} - {}".format(i,'{0:08b}'.format(tpms.value[i]),tpms.value[i], hex(tpms.value[i])))
+    else:
+        raise ValueError("Could not get TPMS information")
+    return tpms_info
 
 # Publish all messages to MQTT
 def publish_data_mqtt(msgs):
@@ -347,7 +386,7 @@ if __name__ == '__main__':
         connection = obd_connect()
 
         cmd_can_receive_address_7ec = OBDCommand("ATCRA7EC",
-                                            "Set the CAN receive address to 7EC",
+                                            "Set the CAN receive address to 7EC - BMS battery information",
                                             b"ATCRA7EC",
                                             0,
                                             raw_string,
@@ -355,8 +394,16 @@ if __name__ == '__main__':
                                             False)
 
         cmd_can_receive_address_7ea = OBDCommand("ATCRA7EA",
-                                            "Set the CAN receive address to 7EA",
+                                            "Set the CAN receive address to 7EA - VMCU information",
                                             b"ATCRA7EA",
+                                            0,
+                                            raw_string,
+                                            ECU.ALL,
+                                            False)
+
+        cmd_can_receive_address_7a8 = OBDCommand("ATCRA7A8",
+                                            "Set the CAN receive address to 7A8 - TPMS information",
+                                            b"ATCRA7A8",
                                             0,
                                             raw_string,
                                             ECU.ALL,
@@ -369,7 +416,7 @@ if __name__ == '__main__':
                                     raw_string,
                                     ECU.ALL,
                                     False)
-        
+
         cmd_can_mask_7ff = OBDCommand("ATCM7FF",
                                 "Set the CAN mask to 7FF",
                                 b"ATCM7FF",
@@ -379,7 +426,7 @@ if __name__ == '__main__':
                                 False)
 
         cmd_can_header_7c6 =  OBDCommand("ATSH7C6",
-                                "Set header to 7C6",
+                                "Set header to 7C6 - BMS battery information",
                                 b"ATSH7C6",
                                 0,
                                 raw_string,
@@ -387,8 +434,16 @@ if __name__ == '__main__':
                                 False)
 
         cmd_can_header_7e2 =  OBDCommand("ATSH7E2",
-                                "Set header to 7E2",
+                                "Set header to 7E2 - VMCU information",
                                 b"ATSH7E2",
+                                0,
+                                raw_string,
+                                ECU.ALL,
+                                False)
+
+        cmd_can_header_7a0 =  OBDCommand("ATSH7A0",
+                                "Set header to 7A0 - TPMS information",
+                                b"ATSH7A0",
                                 0,
                                 raw_string,
                                 ECU.ALL,
@@ -458,13 +513,23 @@ if __name__ == '__main__':
                             ECU.ALL,
                             False)
 
+        cmd_tpms_22c00b = OBDCommand("22C00B",
+                            "Extended command - TPMS information",
+                            b"22C00B",
+                            0,
+                            can_response,
+                            ECU.ALL,
+                            False)
+
         # Add defined commands to supported commands
         connection.supported_commands.add(cmd_can_receive_address_7ec)
         connection.supported_commands.add(cmd_can_receive_address_7ea)
+        connection.supported_commands.add(cmd_can_receive_address_7a8)
         connection.supported_commands.add(cmd_can_filter_7ce)
         connection.supported_commands.add(cmd_can_mask_7ff)
         connection.supported_commands.add(cmd_can_header_7c6)
         connection.supported_commands.add(cmd_can_header_7e2)
+        connection.supported_commands.add(cmd_can_header_7a0)
         connection.supported_commands.add(cmd_bms_2101)
         connection.supported_commands.add(cmd_bms_2102)
         connection.supported_commands.add(cmd_bms_2103)
@@ -473,6 +538,7 @@ if __name__ == '__main__':
         connection.supported_commands.add(cmd_odometer)
         connection.supported_commands.add(cmd_vin)
         connection.supported_commands.add(cmd_vmcu_2101)
+        connection.supported_commands.add(cmd_tpms_22c00b)
     
         # Print supported commands
         # DTC = Diagnostic Trouble Codes
@@ -496,6 +562,12 @@ if __name__ == '__main__':
             mqtt_msgs.extend([{'topic':topic_prefix + "odometer", 'payload':query_odometer(), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
             logger.warning("**** Error querying odometer: {} ****".format(err), exc_info=False)
+
+        try:
+            # Add TPMS information to MQTT messages array
+            mqtt_msgs.extend([{'topic':topic_prefix + "tpms", 'payload':json.dumps(query_tpms_information()), 'qos':0, 'retain':True}])
+        except (ValueError, CanError) as err:
+            logger.warning("**** Error querying tpms information: {} ****".format(err), exc_info=False)
 
     except ConnectionError as err:
         logger.error("OBDII connection error: {0}".format(err), exc_info=False)

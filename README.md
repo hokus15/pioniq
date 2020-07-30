@@ -609,6 +609,37 @@ Sample:
 }
 ```
 
+### tpms
+Tire Pressure Monitor System information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']tpms` i.e.: `car/sensor/ioniq/tpms` as a json object with the following format:
+
+```
+{
+   timestamp          integer. Linux Epoch time.
+   tire_1_pressure    float. Tire 1 pressure in psi.
+   tire_1_temperature integer. Tire 1 temperature in ºC.
+   tire_2_pressure    float. Tire 2 pressure in psi.
+   tire_2_temperature integer. Tire 2 temperature in ºC.
+   tire_3_pressure    float. Tire 3 pressure in psi.
+   tire_3_temperature integer. Tire 3 temperature in ºC.
+   tire_4_pressure    float. Tire 4 pressure in psi.
+   tire_4_temperature integer. Tire 4 temperature in ºC.
+}
+```
+
+Sample:
+```
+{
+   "timestamp":1596146085,
+   "tire_1_pressure":37.2,
+   "tire_1_temperature":28,
+   "tire_2_pressure":38.2
+   "tire_2_temperature":28,
+   "tire_3_pressure":37.8,
+   "tire_3_temperature":33,
+   "tire_4_pressure":39.0,
+   "tire_4_temperature":33,
+}```
+
 ### location
 Location information is published from `gps_data.py` script in the `config['mqtt']['topic_prefix']location` i.e.: `car/sensor/ioniq/location` as a JSON object with the following format:
 ```
