@@ -582,11 +582,20 @@ Sample:
 ```
 
 ### odometer
-Odometer information in Kilometers is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']odometer` i.e.: `car/sensor/ioniq/odometer` as a int value.
+Odometer information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']odometer` i.e.: `car/sensor/ioniq/odometer` as a json object with the following format:
+
+```
+{
+   timestamp integer. Linux Epoch time.
+   odometer  integer. Odometer value in Km.
+}
+```
 
 Sample:
 ```
-22567
+{
+    "timestamp": 1596316222,
+    "odometer": 23100}
 ```
 
 ### vmcu
@@ -597,6 +606,7 @@ Vehicle Motor Control System information is published from `battery_data.py` scr
    timestamp integer. Linux Epoch time.
    vin       string. Vehicle Identification Number, also called a chassis number (or número de bastidor in spanish).
    gear      string. Gear stick position. P = Park, N = Neutral, D = Drive, R = Rear or B = engine braking
+   kmh       float. Vehicle speed in kmh
 }
 ```
 
@@ -606,6 +616,7 @@ Sample:
    "timestamp":1594994497,
    "vin":"XXXXXXXXXXXXXXXXXX",
    "gear": "P"
+   "kmh": 67.0
 }
 ```
 
@@ -639,6 +650,23 @@ Sample:
    "tire_4_pressure":39.0,
    "tire_4_temperature":33,
 }
+```
+
+### external temperature
+External temperature information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']ext_temp` i.e.: `car/sensor/ioniq/ext_temp` as a json object with the following format:
+
+```
+{
+   timestamp            integer. Linux Epoch time.
+   external_temperature float. External temperature in ºC.
+}
+```
+
+Sample:
+```
+{
+    "timestamp": 1596316222,
+    "odometer": 29.5}
 ```
 
 ### location
