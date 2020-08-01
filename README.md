@@ -638,7 +638,8 @@ Sample:
    "tire_3_temperature":33,
    "tire_4_pressure":39.0,
    "tire_4_temperature":33,
-}```
+}
+```
 
 ### location
 Location information is published from `gps_data.py` script in the `config['mqtt']['topic_prefix']location` i.e.: `car/sensor/ioniq/location` as a JSON object with the following format:
