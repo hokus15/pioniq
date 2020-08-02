@@ -19,44 +19,106 @@ class ConnectionError(Exception): pass
 
 class CanError(Exception): pass
 
-# CAN response decoder
+# CAN response decoder. This function returns a bytearray containing ONLY the data.
+# CAN response data format:
+
+# Single frame
+# [0-3] Identifier
+# [3-4] Frame type
+#       Frame type: 0 = single frame
+# [4-5] Data length
+# [5-19] Data. Keep in mind that data length may be shorter than the length of the array, so you should read up to data length.
+
+# First frame (multiple frames)
+# [0-3] Identifier
+# [3-4] Frame type
+#       Frame type: 1 = First frame (multiple frames)
+# [4-7] Data length
+# [7-19] Data
+
+# Consecutive frame
+# [0-3] Identifier
+# [3-4] Frame type
+#       Frame type: 2 = Consecutive frame
+# [4-19] Data. Keep in mind that for last frame data length may be shorter than the length of the array, so you should read up to data length.
+
+# For example:
+# Having the following CAN response frames:
+# 7EC103D6101FFFFFFFF
+# 7EC21A9264826480300
+# 7EC22050EFA1F1F1F1F
+# 7EC231F1F1F001DC714
+# 7EC24C70A012A910001
+# 7EC25547A000151B300
+# 7EC26007AD100007718
+# 7EC27005928B40D017F
+# 7EC280000000003E800
+
+# It will be decomposed as:
+# 7EC 1 03D 6101FFFFFFFF
+# 7EC 2 1 A9264826480300
+# 7EC 2 2 050EFA1F1F1F1F
+# 7EC 2 3 1F1F1F001DC714
+# 7EC 2 4 C70A012A910001
+# 7EC 2 5 547A000151B300
+# 7EC 2 6 007AD100007718
+# 7EC 2 7 005928B40D017F
+# 7EC 2 8 0000000003E8 00
+
+# First frame:
+# Identifier  Frame type                        Data length (03D = 61 bytes) Data
+#  |          |                                 |                            |
+# 7EC         1                                03D                           6101FFFFFFFF -> 6 bytes of data
+# 
+# Consecutive frames:
+# Identifier  Frame type                        Line index  Data
+#  |          |                                 |           |
+# 7EC         2                                 1           A9264826480300 -> +7 bytes of data (total 13 bytes)
+# 7EC         2                                 2           050EFA1F1F1F1F -> +7 bytes of data (total 20 bytes)
+# 7EC         2                                 3           1F1F1F001DC714 -> +7 bytes of data (total 27 bytes)
+# 7EC         2                                 4           C70A012A910001 -> +7 bytes of data (total 34 bytes)
+# 7EC         2                                 5           547A000151B300 -> +7 bytes of data (total 41 bytes)
+# 7EC         2                                 6           007AD100007718 -> +7 bytes of data (total 48 bytes)
+# 7EC         2                                 7           005928B40D017F -> +7 bytes of data (total 55 bytes)
+# 7EC         2                                 8           0000000003E8  00 -> + 6 bytes of data (total 61 bytes)
+#                                                                         |
+#                                                                         Not part of the data (as it's bigger than 03D = 61 bytes of data)
 def can_response(can_message):
     data = None
     data_len = 0
     last_idx = 0
-
     raw = can_message[0].raw().split('\n')
     for line in raw:
         if (len(line) != 19):
             raise ValueError('Error parsing CAN response: {}. Invalid line length {}!=19. '.format(line,len(line)))
-    
+
         offset = 3
         identifier = int(line[0:offset], 16)
-    
+
         frame_type = int(line[offset:offset+1], 16)
-    
+
         if frame_type == 0:     # Single frame
             data_len = int(line[offset+1:offset+2], 16)
             data = bytes.fromhex(line[offset+2:data_len*2+offset+2])
             break
-    
+
         elif frame_type == 1:   # First frame
             data_len = int(line[offset+1:offset+4], 16)
             data = bytearray.fromhex(line[offset+4:])
             last_idx = 0
-    
+
         elif frame_type == 2:   # Consecutive frame
             idx = int(line[offset+1:offset+2], 16)
             if (last_idx + 1) % 0x10 != idx:
                 raise CanError("Bad frame order: last_idx({}) idx({})".format(last_idx,idx))
-    
+
             frame_len = min(7, data_len - len(data))
             data.extend(bytearray.fromhex(line[offset+2:frame_len*2+offset+2]))
             last_idx = idx
-    
+
             if data_len == len(data):
                 break
-    
+
         else:                   # Unexpected frame
             raise ValueError('Unexpected frame')
     return data
@@ -67,11 +129,6 @@ def log_can_response(can_message):
     for i in range(0, len(raw)):
         logger.debug("Data[{}]:{} - {} - {}".format(i,'{0:08b}'.format(raw[i]),raw[i], hex(raw[i])))
     return raw
-
-## Odometer decoder
-#def odometer(can_message): 
-#    raw_b22b002 = can_response(can_message)
-#    return bytes_to_int(raw_b22b002[9:12])
 
 # Extract VIN from raw can response
 def extract_vin(raw_can_response): 
@@ -84,7 +141,7 @@ def extract_vin(raw_can_response):
 def extract_gear(raw_can_response): 
     gear_str = ""
     gear_bits = raw_can_response.value[7]
-    #logger.debug("Gear:{} - {} - {}".format('{0:08b}'.format(gear_bits),gear_bits, hex(gear_bits)))
+    logger.debug("Gear:{} - {} - {}".format('{0:08b}'.format(gear_bits),gear_bits, hex(gear_bits)))
     if gear_bits & 0x1: # 1st bit is 1
         gear_str = gear_str + "P" 
     if gear_bits & 0x2: # 2nd bit is 1
@@ -95,6 +152,7 @@ def extract_gear(raw_can_response):
         gear_str = gear_str + "D"
     if gear_bits & 0x10: # 5th bit is 1
         gear_str = gear_str + "B"
+
     return gear_str
 
 def obd_connect():
@@ -329,7 +387,7 @@ def query_external_temperature():
         'timestamp': int(round(time.time()))
     }
 
-    # Set header to 7C6
+    # Set header to 7E6
     query_command(cmd_can_header_7e6)
     # Set the CAN receive address to 7EC
     query_command(cmd_can_receive_address_7ee)
@@ -602,31 +660,31 @@ if __name__ == '__main__':
             # Add battery information to MQTT messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "battery", 'payload':json.dumps(query_battery_information()), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
-            logger.warning("**** Error querying battery information: {} ****".format(err), exc_info=True)
+            logger.warning("**** Error querying battery information: {} ****".format(err), exc_info=False)
 
         try:
             # Add VMCU information to MQTT messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "vmcu", 'payload':json.dumps(query_vmcu_information()), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
-            logger.warning("**** Error querying vmcu information: {} ****".format(err), exc_info=True)
+            logger.warning("**** Error querying vmcu information: {} ****".format(err), exc_info=False)
 
         try:
             # Add Odometer to MQTT messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "odometer", 'payload':json.dumps(query_odometer()), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
-            logger.warning("**** Error querying odometer: {} ****".format(err), exc_info=True)
+            logger.warning("**** Error querying odometer: {} ****".format(err), exc_info=False)
 
         try:
             # Add TPMS information to MQTT messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "tpms", 'payload':json.dumps(query_tpms_information()), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
-            logger.warning("**** Error querying tpms information: {} ****".format(err), exc_info=True)
+            logger.warning("**** Error querying tpms information: {} ****".format(err), exc_info=False)
 
         try:
             # Add external temperture information to MQTT messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "ext_temp", 'payload':json.dumps(query_external_temperature()), 'qos':0, 'retain':True}])
         except (ValueError, CanError) as err:
-            logger.warning("**** Error querying tpms information: {} ****".format(err), exc_info=True)
+            logger.warning("**** Error querying tpms information: {} ****".format(err), exc_info=False)
 
     except ConnectionError as err:
         logger.error("OBDII connection error: {0}".format(err), exc_info=False)
@@ -635,7 +693,7 @@ if __name__ == '__main__':
     except CanError as err:
         logger.error("Error found reading CAN response: {0}".format(err), exc_info=False)
     except Exception as ex:
-        logger.error("Unexpected error: {}".format(ex), exc_info=True)
+        logger.error("Unexpected error: {}".format(ex), exc_info=False)
     finally:
         publish_data_mqtt(mqtt_msgs)
         if 'connection' in locals() and connection is not None:
