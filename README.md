@@ -595,7 +595,8 @@ Sample:
 ```
 {
     "timestamp": 1596316222,
-    "odometer": 23100}
+    "odometer": 23100
+}
 ```
 
 ### vmcu
@@ -666,7 +667,8 @@ Sample:
 ```
 {
     "timestamp": 1596316222,
-    "odometer": 29.5}
+    "external_temperature": 29.5
+}
 ```
 
 ### location
