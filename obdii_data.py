@@ -10,6 +10,7 @@ import logging.handlers
 import os
 
 import obd
+
 from obd import OBDCommand, OBDStatus
 from obd.protocols import ECU
 from obd.decoders import raw_string
@@ -190,12 +191,12 @@ def query_command(command):
     if not valid_response:
         raise ValueError("No valid response for {}. Max attempts ({}) exceeded.".format(command, MAX_ATTEMPTS))
     else:
-        logger.debug("{} got response".format(command))
+        logger.info("Got response from command: {} ".format(command))
         return cmd_response
 
 def query_battery_information():
     logger.info("**** Querying battery information ****")
-    # Set header to 7E4.
+    # Set header to 7E4
     query_command(cmd_can_header_7e4)
     # Set the CAN receive address to 7EC
     query_command(cmd_can_receive_address_7ec)
@@ -207,7 +208,7 @@ def query_battery_information():
     raw_2104 = query_command(cmd_bms_2104)
     raw_2105 = query_command(cmd_bms_2105)
     
-    # Extract status of health value from responses
+    # Extract status of health value from corresponding response
     soh = bytes_to_int(raw_2105.value[27:29]) / 10.0
 
     battery_info = {}
@@ -217,7 +218,7 @@ def query_battery_information():
         dcBatteryCurrent = bytes_to_int(raw_2101.value[12:14]) / 10.0
         dcBatteryVoltage = bytes_to_int(raw_2101.value[14:16]) / 10.0
         
-        cellTemps = [
+        moduleTemps = [
             bytes_to_int(raw_2101.value[18:19]), #  0
             bytes_to_int(raw_2101.value[19:20]), #  1
             bytes_to_int(raw_2101.value[20:21]), #  2
@@ -277,12 +278,12 @@ def query_battery_information():
             'dcBatteryCurrent':                dcBatteryCurrent, # A
             'dcBatteryPower':                  dcBatteryCurrent * dcBatteryVoltage / 1000.0, # kW
             'dcBatteryVoltage':                dcBatteryVoltage, # V
-            'dcBatteryAvgTemperature':         sum(cellTemps) / len(cellTemps), # C
+            'dcBatteryAvgTemperature':         sum(moduleTemps) / len(moduleTemps), # C
 
             'driveMotorSpeed':                 bytes_to_int(raw_2101.value[55:57]) # RPM
             })
     
-        for i,temp in enumerate(cellTemps):
+        for i,temp in enumerate(moduleTemps):
             key = "dcBatteryModuleTemp{:02d}".format(i+1)
             battery_info[key] = float(temp)
 
@@ -328,28 +329,38 @@ def query_vmcu_information():
     query_command(cmd_can_header_7e2)
     # Set the CAN receive address to 7EA
     query_command(cmd_can_receive_address_7ea)
-
-    raw_vin = query_command(cmd_vin)
-    raw_2101 = query_command(cmd_vmcu_2101)
     
-    vin = extract_vin(raw_vin)
-    gear = extract_gear(raw_2101)
-    mph_speed = (((raw_2101.value[16] * 256) + raw_2101.value[15]) / 100.0 )
-    kmh_speed = mph_speed * 1.60934
+    # VIN
+    try:
+        raw_vin = query_command(cmd_vin)
+        vin = extract_vin(raw_vin)
+        # Add vin to vmcu info
+        if 'vin' in locals() and vin is not None :
+            vmcu_info['vin'] = vin
+        else :
+            logger.warning("Could not get VIN")
+    except Exception as err:
+        logger.error("Could not get VIN: {}".format(err), exc_info=False)
 
-    # Add vin to vmcu info
-    if 'vin' in locals() and vin is not None :
-        logger.info("**** Got Vehicle Identification Number ****")
-        vmcu_info['vin'] = vin
-    # Add gear stick position to vmcu info
-    if 'gear' in locals() and gear is not None:
-        logger.info("**** Got gear stick position ****")
-        vmcu_info['gear'] = gear
-    # Add kmh to vmcu info
-    if 'kmh_speed' in locals() and kmh_speed is not None:
-        logger.info("**** Got kmh speed ****")
-        vmcu_info['kmh'] = kmh_speed
+    try:
+        raw_2101 = query_command(cmd_vmcu_2101)
+        gear = extract_gear(raw_2101)
+        brakesBits = raw_2101.value[8]
+        # Add kmh to vmcu info
+        vmcu_info.update({
+            'speed':             (((raw_2101.value[16] * 256) + raw_2101.value[15]) / 100.0 ) * 1.60934, # kmh. Multiplied by 1.60934 to convert mph to kmh
+            'accel_pedal_depth': raw_2101.value[16] / 2, # %
+            'brake_lamp':        1 if brakesBits & 0x1 else 0, # 1st bit is 1
+            'brakes_on':         0 if brakesBits & 0x2 else 1 # 2nd bit is 0
+        })
 
+        # Add gear stick position to vmcu info
+        if 'gear' in locals() and gear is not None:
+            vmcu_info['gear'] = gear
+        else :
+            logger.warning("Could not get gear stick position")
+    except Exception as err:
+        logger.error("Could not get VMCU information: {}".format(err), exc_info=False)
     return vmcu_info
 
 def query_tpms_information():
@@ -376,7 +387,7 @@ def query_tpms_information():
             'tire_4_pressure':    raw_tpms.value[19] * 0.2, # psi
             'tire_4_temperature': raw_tpms.value[20] - 55, # C
             })
-        logger.info("**** Got tpms information ****")
+        logger.info("**** Got TPMS information ****")
     else:
         raise ValueError("Could not get TPMS information")
     return tpms_info
@@ -655,7 +666,7 @@ if __name__ == '__main__':
         # DTC = Diagnostic Trouble Codes
         # MIL = Malfunction Indicator Lamp
         logger.debug(connection.print_commands())
-        
+
         try:
             # Add battery information to MQTT messages array
             mqtt_msgs.extend([{'topic':topic_prefix + "battery", 'payload':json.dumps(query_battery_information()), 'qos':0, 'retain':True}])
