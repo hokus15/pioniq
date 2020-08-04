@@ -273,7 +273,7 @@ git clone https://github.com/hokus15/pioniq.git
 
 Config files are JSON files and should be created to run the scripts. You have a template file for each of the scripts:
 
-pioniq/battery_data.config.json file format:
+pioniq/obdii_data.config.json file format:
 ```
 {
     mqtt: {               object. MQTT configuration section.
@@ -311,7 +311,7 @@ pioniq/gps_data.config.json file format:
 
 Copy config files from template.
 ```
-cp pioniq/battery_data.config.template.json pioniq/battery_data.config.json
+cp pioniq/obdii_data.config.template.json pioniq/obdii_data.config.json
 cp pioniq/gps_data.config.template.json pioniq/gps_data.config.json
 ```
 
@@ -326,7 +326,7 @@ To test if everything works and execute the first script run:
 
 Run the command:
 ```
-python pioniq/battery_data.py
+python pioniq/obdii_data.py
 ```
 
 This should publish battery information to the configured MQTT server.
@@ -335,14 +335,14 @@ If this works congratulations you are almost done!
 
 ### Run automatically Battery data script
 
-To run the `battery_data.py` script automatically every minute, we need to set up a cron job, to do so:
+To run the `obdii_data.py` script automatically every minute, we need to set up a cron job, to do so:
 ```
 crontab -e
 ```
 
 And configure the following cron job:
 ```
-* * * * * python /home/pi/pioniq/battery_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
+* * * * * python /home/pi/pioniq/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
 ```
 
 ### [OPTIONAL] Run automatically GPS data script
@@ -386,7 +386,7 @@ The battery, odometer and location information is published in MQTT as a string 
 Those are the MQTT topics and format used for each one:
 
 ### state
-Car state is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']state` i.e.: `car/sensor/ioniq/state` as "ON" constant.
+Car state is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']state` i.e.: `car/sensor/ioniq/state` as "ON" constant.
 
 Sample:
 ```
@@ -394,7 +394,7 @@ ON
 ```
 
 ### battery
-BMS (Battery Management System) information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']battery` i.e.: `car/sensor/ioniq/battery` as a JSON object with the following format:
+BMS (Battery Management System) information is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']battery` i.e.: `car/sensor/ioniq/battery` as a JSON object with the following format:
 
 ```
 {
@@ -582,7 +582,7 @@ Sample:
 ```
 
 ### odometer
-Odometer information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']odometer` i.e.: `car/sensor/ioniq/odometer` as a json object with the following format:
+Odometer information is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']odometer` i.e.: `car/sensor/ioniq/odometer` as a json object with the following format:
 
 ```
 {
@@ -600,7 +600,7 @@ Sample:
 ```
 
 ### vmcu
-Vehicle Motor Control System information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']vmcu` i.e.: `car/sensor/ioniq/vmcu` as a json object with the following format:
+Vehicle Motor Control System information is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']vmcu` i.e.: `car/sensor/ioniq/vmcu` as a json object with the following format:
 
 ```
 {
@@ -622,7 +622,7 @@ Sample:
 ```
 
 ### tpms
-Tire Pressure Monitor System information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']tpms` i.e.: `car/sensor/ioniq/tpms` as a json object with the following format:
+Tire Pressure Monitor System information is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']tpms` i.e.: `car/sensor/ioniq/tpms` as a json object with the following format:
 
 ```
 {
@@ -654,7 +654,7 @@ Sample:
 ```
 
 ### external temperature
-External temperature information is published from `battery_data.py` script in the `config['mqtt']['topic_prefix']ext_temp` i.e.: `car/sensor/ioniq/ext_temp` as a json object with the following format:
+External temperature information is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']ext_temp` i.e.: `car/sensor/ioniq/ext_temp` as a json object with the following format:
 
 ```
 {
