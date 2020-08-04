@@ -1,6 +1,8 @@
 # pioniq
 Extract OBDII data for Hyundai Ioniq EV - 28kWh, as well as the GPS location (using an external USB device) and publishes it to MQTT broker using a Raspberry Pi Zero W.
 
+If you test it and it works (it should!) with Hybrid and PlugIn Hybrid versions let me know.
+
 ## Use cases
 
 TODO
