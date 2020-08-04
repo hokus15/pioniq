@@ -8,6 +8,7 @@ import json
 import logging
 import logging.handlers
 import os
+import codecs
 
 import obd
 
@@ -19,6 +20,21 @@ from obd.utils import bytes_to_int
 class ConnectionError(Exception): pass
 
 class CanError(Exception): pass
+
+def bytes_to_int_signed(b):
+    '''Convert big-endian signed integer bytearray to int
+    int_from_bytes(b) == int.from_bytes(b, 'big', signed=True)'''
+    if not b: # special-case 0 to avoid b[0] raising
+        return 0
+    n = b[0] & 0x7f # skip sign bit
+    for by in b[1:]:
+        n = n * 256 + by
+    if b[0] & 0x80: # if sign bit is set, 2's complement
+        bits = 8*len(b)
+        offset = 2**(bits-1)
+        return n - offset
+    else:
+        return n
 
 # CAN response decoder. This function returns a bytearray containing ONLY the data.
 # CAN response data format:
@@ -215,22 +231,24 @@ def query_battery_information():
     # Only create battery status data if got a consistent Status Of Health (sometimes it's not consistent)
     if (soh <= 100):
         chargingBits = raw_2101.value[11]
-        dcBatteryCurrent = bytes_to_int(raw_2101.value[12:14]) / 10.0
+        charging = 1 if chargingBits & 0x80 else 0, # 8th bit is 1
+
+        dcBatteryCurrent = bytes_to_int_signed(raw_2101.value[12:14]) / 10.0
         dcBatteryVoltage = bytes_to_int(raw_2101.value[14:16]) / 10.0
         
         moduleTemps = [
-            bytes_to_int(raw_2101.value[18:19]), #  0
-            bytes_to_int(raw_2101.value[19:20]), #  1
-            bytes_to_int(raw_2101.value[20:21]), #  2
-            bytes_to_int(raw_2101.value[21:22]), #  3
-            bytes_to_int(raw_2101.value[22:23]), #  4
-            bytes_to_int(raw_2105.value[11:12]), #  5
-            bytes_to_int(raw_2105.value[12:13]), #  6
-            bytes_to_int(raw_2105.value[13:14]), #  7
-            bytes_to_int(raw_2105.value[14:15]), #  8
-            bytes_to_int(raw_2105.value[15:16]), #  9
-            bytes_to_int(raw_2105.value[16:17]), # 10
-            bytes_to_int(raw_2105.value[17:18])] # 11
+            bytes_to_int_signed(raw_2101.value[18:19]), #  0
+            bytes_to_int_signed(raw_2101.value[19:20]), #  1
+            bytes_to_int_signed(raw_2101.value[20:21]), #  2
+            bytes_to_int_signed(raw_2101.value[21:22]), #  3
+            bytes_to_int_signed(raw_2101.value[22:23]), #  4
+            bytes_to_int_signed(raw_2105.value[11:12]), #  5
+            bytes_to_int_signed(raw_2105.value[12:13]), #  6
+            bytes_to_int_signed(raw_2105.value[13:14]), #  7
+            bytes_to_int_signed(raw_2105.value[14:15]), #  8
+            bytes_to_int_signed(raw_2105.value[15:16]), #  9
+            bytes_to_int_signed(raw_2105.value[16:17]), # 10
+            bytes_to_int_signed(raw_2105.value[17:18])] # 11
 
         cellVoltages = []
         for cmd in [raw_2102, raw_2103, raw_2104]:
@@ -248,7 +266,7 @@ def query_battery_information():
             'bmsMainRelay':                    1 if chargingBits & 0x1 else 0, # 1st bit is 1 
             'auxBatteryVoltage':               raw_2101.value[31] / 10.0, # V
 
-            'charging':                        1 if chargingBits & 0x80 else 0, # 8th bit is 1
+            'charging':                        charging
             'normalChargePort':                1 if chargingBits & 0x20 else 0, # 6th bit is 1
             'rapidChargePort':                 1 if chargingBits & 0x40 else 0, # 7th bit is 1
 
@@ -269,9 +287,9 @@ def query_battery_information():
             'dcBatteryCellVoltageDeviation':   raw_2105.value[22] / 50, # V 
             'dcBatteryHeater1Temperature':     float(raw_2105.value[25]), # C 
             'dcBatteryHeater2Temperature':     float(raw_2105.value[26]), # C 
-            'dcBatteryInletTemperature':       bytes_to_int(raw_2101.value[22:23]), # C
-            'dcBatteryMaxTemperature':         bytes_to_int(raw_2101.value[16:17]), # C
-            'dcBatteryMinTemperature':         bytes_to_int(raw_2101.value[17:18]), # C
+            'dcBatteryInletTemperature':       bytes_to_int_signed(raw_2101.value[22:23]), # C
+            'dcBatteryMaxTemperature':         bytes_to_int_signed(raw_2101.value[16:17]), # C
+            'dcBatteryMinTemperature':         bytes_to_int_signed(raw_2101.value[17:18]), # C
             'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
             'dcBatteryCellMinDeterioration':   bytes_to_int(raw_2105.value[30:32]) / 10.0, # %
             'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
@@ -280,7 +298,7 @@ def query_battery_information():
             'dcBatteryVoltage':                dcBatteryVoltage, # V
             'dcBatteryAvgTemperature':         sum(moduleTemps) / len(moduleTemps), # C
 
-            'driveMotorSpeed':                 bytes_to_int(raw_2101.value[55:57]) # RPM
+            'driveMotorSpeed':                 bytes_to_int_signed(raw_2101.value[55:57]) # RPM
             })
     
         for i,temp in enumerate(moduleTemps):
