@@ -266,7 +266,7 @@ def query_battery_information():
             'bmsMainRelay':                    1 if chargingBits & 0x1 else 0, # 1st bit is 1 
             'auxBatteryVoltage':               raw_2101.value[31] / 10.0, # V
 
-            'charging':                        charging
+            'charging':                        charging,
             'normalChargePort':                1 if chargingBits & 0x20 else 0, # 6th bit is 1
             'rapidChargePort':                 1 if chargingBits & 0x40 else 0, # 7th bit is 1
 
