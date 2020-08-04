@@ -1,5 +1,5 @@
 # pioniq
-Extract the Hyundai Ioniq Electric battery and odometer data from OBDII, as well as the GPS location (using an external USB device) and publishes it to MQTT broker.
+Extract OBDII data for Hyundai Ioniq Electric (2019), as well as the GPS location (using an external USB device) and publishes it to MQTT broker using a Raspberry Pi Zero W.
 
 ## Use cases
 
@@ -329,11 +329,11 @@ Run the command:
 python pioniq/obdii_data.py
 ```
 
-This should publish battery information to the configured MQTT server.
+This should publish obdii information to the configured MQTT server.
 
 If this works congratulations you are almost done!
 
-### Run automatically Battery data script
+### Run automatically obdii data script
 
 To run the `obdii_data.py` script automatically every minute, we need to set up a cron job, to do so:
 ```
