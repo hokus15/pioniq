@@ -627,14 +627,14 @@ Tire Pressure Monitor System information is published from `obdii_data.py` scrip
 ```
 {
    timestamp          integer. Linux Epoch time.
-   tire_1_pressure    float. Tire 1 pressure in psi.
-   tire_1_temperature integer. Tire 1 temperature in ºC.
-   tire_2_pressure    float. Tire 2 pressure in psi.
-   tire_2_temperature integer. Tire 2 temperature in ºC.
-   tire_3_pressure    float. Tire 3 pressure in psi.
-   tire_3_temperature integer. Tire 3 temperature in ºC.
-   tire_4_pressure    float. Tire 4 pressure in psi.
-   tire_4_temperature integer. Tire 4 temperature in ºC.
+   tire_fl_pressure    float. Front left tire pressure in psi.
+   tire_fl_temperature integer. Front left tire temperature in ºC.
+   tire_fr_pressure    float. Front right tire pressure in psi.
+   tire_fr_temperature integer. Front right tire temperature in ºC.
+   tire_bl_pressure    float. Back left tire pressure in psi.
+   tire_bl_temperature integer. Back left tire temperature in ºC.
+   tire_br_pressure    float. Back right tire pressure in psi.
+   tire_br_temperature integer. Back right tire temperature in ºC.
 }
 ```
 
@@ -642,14 +642,14 @@ Sample:
 ```
 {
    "timestamp":1596146085,
-   "tire_1_pressure":37.2,
-   "tire_1_temperature":28,
-   "tire_2_pressure":38.2
-   "tire_2_temperature":28,
-   "tire_3_pressure":37.8,
-   "tire_3_temperature":33,
-   "tire_4_pressure":39.0,
-   "tire_4_temperature":33,
+   "tire_fl_pressure":37.2,
+   "tire_fl_temperature":28,
+   "tire_fr_pressure":38.2
+   "tire_fr_temperature":28,
+   "tire_bl_pressure":37.8,
+   "tire_bl_temperature":33,
+   "tire_br_pressure":39.0,
+   "tire_br_temperature":33,
 }
 ```
 

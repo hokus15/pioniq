@@ -375,17 +375,17 @@ def query_tpms_information():
     if 'raw_tpms' in locals() and raw_tpms is not None and raw_tpms.value is not None:
         tpms_info.update({
             'timestamp': int(round(time.time())),
-            'tire_1_pressure':    raw_tpms.value[7] * 0.2, # psi
-            'tire_1_temperature': raw_tpms.value[8] - 55, # C
+            'tire_fl_pressure':    raw_tpms.value[7] * 0.2, # psi - Front Left
+            'tire_fl_temperature': raw_tpms.value[8] - 55, # C - Front Left
             
-            'tire_2_pressure':    raw_tpms.value[11] * 0.2, # psi
-            'tire_2_temperature': raw_tpms.value[12] - 55, # C
+            'tire_fr_pressure':    raw_tpms.value[11] * 0.2, # psi - Front Right
+            'tire_fr_temperature': raw_tpms.value[12] - 55, # C - Front Right
             
-            'tire_3_pressure':    raw_tpms.value[15] * 0.2, # psi
-            'tire_3_temperature': raw_tpms.value[16] - 55, # C
+            'tire_bl_pressure':    raw_tpms.value[15] * 0.2, # psi - Back Left
+            'tire_bl_temperature': raw_tpms.value[16] - 55, # C - Back Left
             
-            'tire_4_pressure':    raw_tpms.value[19] * 0.2, # psi
-            'tire_4_temperature': raw_tpms.value[20] - 55, # C
+            'tire_br_pressure':    raw_tpms.value[19] * 0.2, # psi - Back Right
+            'tire_br_temperature': raw_tpms.value[20] - 55, # C - Back Right
             })
         logger.info("**** Got TPMS information ****")
     else:
@@ -600,7 +600,7 @@ if __name__ == '__main__':
                             ECU.ALL,
                             False)
     
-        cmd_odometer = OBDCommand("ODOMETER",
+        cmd_odometer = OBDCommand("22b002",
                             "Extended command - Odometer information",
                             b"22b002",
                             0, #15
@@ -608,7 +608,7 @@ if __name__ == '__main__':
                             ECU.ALL,
                             False)
 
-        cmd_vin = OBDCommand("VIN",
+        cmd_vin = OBDCommand("1A80",
                             "Extended command - Vehicle Identification Number",
                             b"1A80",
                             0, #99
