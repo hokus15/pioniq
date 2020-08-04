@@ -122,6 +122,7 @@ def can_response(can_message):
 
         else:                   # Unexpected frame
             raise ValueError('Unexpected frame')
+    #logger.debug("Expected data length: {}".format(data_len))
     return data
 
 # The same as can_response decoder but logging data in binary, decimal and hex for debugging purposes
@@ -142,7 +143,6 @@ def extract_vin(raw_can_response):
 def extract_gear(raw_can_response): 
     gear_str = ""
     gear_bits = raw_can_response.value[7]
-    logger.debug("Gear:{} - {} - {}".format('{0:08b}'.format(gear_bits),gear_bits, hex(gear_bits)))
     if gear_bits & 0x1: # 1st bit is 1
         gear_str = gear_str + "P" 
     if gear_bits & 0x2: # 2nd bit is 1
@@ -563,7 +563,7 @@ if __name__ == '__main__':
         cmd_bms_2101 = OBDCommand("2101",
                             "Extended command - BMS Battery information",
                             b"2101",
-                            0,
+                            0, #61
                             can_response,
                             ECU.ALL,
                             False)
@@ -571,7 +571,7 @@ if __name__ == '__main__':
         cmd_bms_2102 = OBDCommand("2102",
                             "Extended command - BMS Battery information",
                             b"2102",
-                            0,
+                            0, #38
                             can_response,
                             ECU.ALL,
                             False)
@@ -579,7 +579,7 @@ if __name__ == '__main__':
         cmd_bms_2103 = OBDCommand("2103",
                             "Extended command - BMS Battery information",
                             b"2103",
-                            0,
+                            0, #38
                             can_response,
                             ECU.ALL,
                             False)
@@ -587,7 +587,7 @@ if __name__ == '__main__':
         cmd_bms_2104 = OBDCommand("2104",
                             "Extended command - BMS Battery information",
                             b"2104",
-                            0,
+                            0, #38
                             can_response,
                             ECU.ALL,
                             False)
@@ -595,7 +595,7 @@ if __name__ == '__main__':
         cmd_bms_2105 = OBDCommand("2105",
                             "Extended command - BMS Battery information",
                             b"2105",
-                            0,
+                            0, #45
                             can_response,
                             ECU.ALL,
                             False)
@@ -603,7 +603,7 @@ if __name__ == '__main__':
         cmd_odometer = OBDCommand("ODOMETER",
                             "Extended command - Odometer information",
                             b"22b002",
-                            0,
+                            0, #15
                             can_response,
                             ECU.ALL,
                             False)
@@ -611,7 +611,7 @@ if __name__ == '__main__':
         cmd_vin = OBDCommand("VIN",
                             "Extended command - Vehicle Identification Number",
                             b"1A80",
-                            0,
+                            0, #99
                             can_response,
                             ECU.ALL,
                             False)
@@ -619,7 +619,7 @@ if __name__ == '__main__':
         cmd_vmcu_2101 = OBDCommand("2101",
                             "Extended command - VMCU information",
                             b"2101",
-                            0,
+                            0, #22
                             can_response,
                             ECU.ALL,
                             False)
@@ -627,7 +627,7 @@ if __name__ == '__main__':
         cmd_tpms_22c00b = OBDCommand("22C00B",
                             "Extended command - TPMS information",
                             b"22C00B",
-                            0,
+                            0, #23
                             can_response,
                             ECU.ALL,
                             False)
@@ -635,7 +635,7 @@ if __name__ == '__main__':
         cmd_ext_temp = OBDCommand("2180",
                             "Extended command - External temperature",
                             b"2180",
-                            0,
+                            0, #25
                             can_response,
                             ECU.ALL,
                             False)
