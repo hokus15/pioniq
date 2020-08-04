@@ -424,23 +424,23 @@ def publish_data_mqtt(msgs):
 
 # main script
 if __name__ == '__main__':
-    logger = logging.getLogger('battery')
+    logger = logging.getLogger('obdii')
     
     console_handler = logging.StreamHandler() # sends output to stderr
     console_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-10s %(levelname)-8s %(message)s"))
     console_handler.setLevel(logging.DEBUG)
     logger.addHandler(console_handler)
     
-    file_handler = logging.handlers.TimedRotatingFileHandler(os.path.dirname(os.path.realpath(__file__)) + '/battery_data.log',
+    file_handler = logging.handlers.TimedRotatingFileHandler(os.path.dirname(os.path.realpath(__file__)) + '/obdii_data.log',
                                                     when='midnight',
-                                                    backupCount=15) # sends output to battery_data.log file rotating it at midnight and storing latest 15 days
+                                                    backupCount=15) # sends output to obdii_data.log file rotating it at midnight and storing latest 15 days
     file_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-10s %(levelname)-8s %(message)s"))
     file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
 
     logger.setLevel(logging.DEBUG)
     
-    with open(os.path.dirname(os.path.realpath(__file__)) + '/battery_data.config.json') as config_file:
+    with open(os.path.dirname(os.path.realpath(__file__)) + '/obdii_data.config.json') as config_file:
         config = json.loads(config_file.read())
     
     broker_address = config['mqtt']['broker']
