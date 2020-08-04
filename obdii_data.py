@@ -180,7 +180,7 @@ def query_command(command):
     while not valid_response and command_count < MAX_ATTEMPTS:
         command_count += 1
         try:
-            cmd_response = connection.query(command)
+            cmd_response = connection.query(command, force=True)
         except Exception as ex:
             exception = True
         valid_response = not(cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception)
@@ -640,28 +640,6 @@ if __name__ == '__main__':
                             ECU.ALL,
                             False)
 
-        # Add defined commands to supported commands
-        connection.supported_commands.add(cmd_can_header_7e4)
-        connection.supported_commands.add(cmd_can_header_7c6)
-        connection.supported_commands.add(cmd_can_header_7e2)
-        connection.supported_commands.add(cmd_can_header_7a0)
-        connection.supported_commands.add(cmd_can_header_7e6)
-        connection.supported_commands.add(cmd_can_receive_address_7ec)
-        connection.supported_commands.add(cmd_can_receive_address_7ea)
-        connection.supported_commands.add(cmd_can_receive_address_7a8)
-        connection.supported_commands.add(cmd_can_receive_address_7ee)
-        connection.supported_commands.add(cmd_can_filter_7ce)
-        connection.supported_commands.add(cmd_bms_2101)
-        connection.supported_commands.add(cmd_bms_2102)
-        connection.supported_commands.add(cmd_bms_2103)
-        connection.supported_commands.add(cmd_bms_2104)
-        connection.supported_commands.add(cmd_bms_2105)
-        connection.supported_commands.add(cmd_odometer)
-        connection.supported_commands.add(cmd_vin)
-        connection.supported_commands.add(cmd_vmcu_2101)
-        connection.supported_commands.add(cmd_tpms_22c00b)
-        connection.supported_commands.add(cmd_ext_temp)
-    
         # Print supported commands
         # DTC = Diagnostic Trouble Codes
         # MIL = Malfunction Indicator Lamp
