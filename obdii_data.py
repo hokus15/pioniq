@@ -238,6 +238,7 @@ def query_battery_information():
         dcBatteryCellMaxDeterioration = bytes_to_int(raw_2105.value[27:29]) / 10.0
         dcBatteryCellMinDeterioration = bytes_to_int(raw_2105.value[30:32]) / 10.0
         socDisplay = int(raw_2105.value[33] / 2.0)
+        socBms = raw_2101.value[6] / 2.0
         
         mins_to_complete = 0
         
@@ -247,16 +248,16 @@ def query_battery_information():
             logger.debug("--------------------------------------------- average_deterioration: {}".format(average_deterioration))
             lost_soh = 100 - average_deterioration
             logger.debug("--------------------------------------------- lost_soh: {}".format(lost_soh))
-            lost_wh = (battery_capacity * 1000) * (lost_soh / 100)
+            lost_wh = ((battery_capacity * 1000) * lost_soh) / 100
             logger.debug("--------------------------------------------- lost_wh: {}".format(lost_wh))
-            remaining_pct = 100 - socDisplay
+            remaining_pct = 100 - (min(socBms,socDisplay))
             logger.debug("--------------------------------------------- remaining_pct: {}".format(remaining_pct))
-            remaining_wh = ((battery_capacity * 1000) - lost_wh) * (remaining_pct / 100)
+            remaining_wh = (((battery_capacity * 1000) - lost_wh) * remaining_pct) / 100
             logger.debug("--------------------------------------------- remaining_wh: {}".format(remaining_wh))
             charge_power = abs((dcBatteryCurrent * dcBatteryVoltage))
             logger.debug("--------------------------------------------- charge_power: {}".format(charge_power))
             mins_to_complete = int((remaining_wh / charge_power) * 60)
-            logger.debug("--------------------------------------------- mins_to_complete: {}".format(mins_to_complete))
+            logger.debug("--------------------------------------------- mins_to_complete: {} hours {} mins".format(int(mins_to_complete/60), mins_to_complete%60))
 
         moduleTemps = [
             bytes_to_int_signed(raw_2101.value[18:19]), #  0
@@ -280,7 +281,7 @@ def query_battery_information():
         battery_info.update({
             'timestamp':                       int(round(time.time())),
 
-            'socBms':                          raw_2101.value[6] / 2.0, # %
+            'socBms':                          socBms, # %
             'socDisplay':                      socDisplay, # %
             'soh':                             soh, # %
 
