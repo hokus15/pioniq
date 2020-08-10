@@ -315,13 +315,13 @@ def query_battery_information():
             'driveMotorSpeed':                 bytes_to_int_signed(raw_2101.value[55:57]) # RPM
             })
     
-#        for i,temp in enumerate(moduleTemps):
-#            key = "dcBatteryModuleTemp{:02d}".format(i+1)
-#            battery_info[key] = float(temp)
-#
-#        for i,cvolt in enumerate(cellVoltages):
-#            key = "dcBatteryCellVoltage{:02d}".format(i+1)
-#            battery_info[key] = float(cvolt)
+        for i,temp in enumerate(moduleTemps):
+            key = "dcBatteryModuleTemp{:02d}".format(i+1)
+            battery_info[key] = float(temp)
+
+        for i,cvolt in enumerate(cellVoltages):
+            key = "dcBatteryCellVoltage{:02d}".format(i+1)
+            battery_info[key] = float(cvolt)
 
         logger.info("**** Got battery information ****")
     else:
