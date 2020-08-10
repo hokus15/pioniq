@@ -9,5 +9,8 @@
     "serial": {
         "port" : "/dev/rfcomm0",
         "baudrate": 9600
+    },
+    "vehicle": {
+        "battery_capacity": 28
     }
 }

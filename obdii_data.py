@@ -212,6 +212,7 @@ def query_command(command):
 
 def query_battery_information():
     logger.info("**** Querying battery information ****")
+    battery_capacity = config['vehicle']['battery_capacity']
     # Set header to 7E4
     query_command(cmd_can_header_7e4)
     # Set the CAN receive address to 7EC
@@ -231,11 +232,18 @@ def query_battery_information():
     # Only create battery status data if got a consistent Status Of Health (sometimes it's not consistent)
     if (soh <= 100):
         chargingBits = raw_2101.value[11]
-        charging = 1 if chargingBits & 0x80 else 0, # 8th bit is 1
+        charging = 1 if chargingBits & 0x80 else 0 # 8th bit is 1
 
         dcBatteryCurrent = bytes_to_int_signed(raw_2101.value[12:14]) / 10.0
         dcBatteryVoltage = bytes_to_int(raw_2101.value[14:16]) / 10.0
         
+        mins_to_complete = 0
+        if charging == 1: 
+            missing_pct = 100-(int(raw_2105.value[33] / 2.0))
+            missing_wh = (battery_capacity * 1000) * (missing_pct / 100)
+            charge_power = abs((dcBatteryCurrent * dcBatteryVoltage))
+            mins_to_complete = int((missing_wh / charge_power) * 60)
+
         moduleTemps = [
             bytes_to_int_signed(raw_2101.value[18:19]), #  0
             bytes_to_int_signed(raw_2101.value[19:20]), #  1
@@ -269,6 +277,7 @@ def query_battery_information():
             'charging':                        charging,
             'normalChargePort':                1 if chargingBits & 0x20 else 0, # 6th bit is 1
             'rapidChargePort':                 1 if chargingBits & 0x40 else 0, # 7th bit is 1
+            'minsToCompleteCharge':            mins_to_complete, # Mins
 
             'fanStatus':                       raw_2101.value[29], # Hz
             'fanFeedback':                     raw_2101.value[30],
@@ -290,6 +299,7 @@ def query_battery_information():
             'dcBatteryInletTemperature':       bytes_to_int_signed(raw_2101.value[22:23]), # C
             'dcBatteryMaxTemperature':         bytes_to_int_signed(raw_2101.value[16:17]), # C
             'dcBatteryMinTemperature':         bytes_to_int_signed(raw_2101.value[17:18]), # C
+            # TODO Add max min cell voltage and cell number
             'dcBatteryCellMaxDeterioration':   bytes_to_int(raw_2105.value[27:29]) / 10.0, # %
             'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
             'dcBatteryCellMinDeterioration':   bytes_to_int(raw_2105.value[30:32]) / 10.0, # %

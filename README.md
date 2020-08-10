@@ -278,16 +278,19 @@ Config files are JSON files and should be created to run the scripts. You have a
 pioniq/obdii_data.config.json file format:
 ```
 {
-    mqtt: {               object. MQTT configuration section.
-        broker :          string. String representing the MQTTS broker host name. i.e: test.mosquitto.org
-        port :            int. MQTTS port. i.e: 8883
-        user :            string. MQTTS broker user name.
-        password :        string. MQTTS broker password.
-        topic_prefix :    string. Topic prefix to use for publishing MQTT messages. i.e: car/sensor/ioniq/
+    mqtt: {               object  MQTT configuration section.
+        broker :          string  String representing the MQTTS broker host name. i.e: test.mosquitto.org
+        port :            integer MQTTS port. i.e: 8883
+        user :            string  MQTTS broker user name.
+        password :        string  MQTTS broker password.
+        topic_prefix :    string  Topic prefix to use for publishing MQTT messages. i.e: car/sensor/ioniq/
     },
-    serial: {             object. OBDII serial configuration section.
-        port :            string. Serial port assigned to you OBDII dongle. i.e: /dev/rfcomm0
-        baudrate :        int. Baud rate for OBDII dongle connection. i.e: 9600
+    serial: {             object  OBDII serial configuration section.
+        port :            string  Serial port assigned to you OBDII dongle. i.e: /dev/rfcomm0
+        baudrate :        integer Baud rate for OBDII dongle connection. i.e: 9600
+    },
+    vehicle: {            object  Vehicle configuration
+        battery_capacity: integer Vehicle battery capacity in kWh.
     }
 }
 ```
@@ -410,6 +413,7 @@ BMS (Battery Management System) information is published from `obdii_data.py` sc
    charging                        0 or 1          Is the car charging ? 0: false, 1: true.
    normalChargePort                0 or 1          Is charging using normal charge port? 0: false, 1: true.
    rapidChargePort                 0 or 1          Is charging using rapid charge port? 0: false, 1: true.
+   minsToCompleteCharge            integer         Minutes to complete 100% battery charge. Estimation based on current charge speed. 0 if not charging.
    fanStatus                       integer (0-9)   Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
    fanFeedback                     integer         Fan feedback signal in Hz.
    cumulativeEnergyCharged         float           Cumulative energy charged in kWh.
