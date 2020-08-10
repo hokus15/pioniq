@@ -618,7 +618,7 @@ Vehicle Motor Control System information is published from `obdii_data.py` scrip
 {
    timestamp integer Linux Epoch time.
    vin       string  Vehicle Identification Number, also called a chassis number (or número de bastidor in spanish).
-   gear      string  Gear stick position. P = Park, N = Neutral, D = Drive, R = Rear or B = engine braking
+   gear      string  Gear stick position. P = Park, N = Neutral, D = Drive or R = Rear
    kmh       float   Vehicle speed in kmh
 }
 ```

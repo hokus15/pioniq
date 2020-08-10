@@ -167,8 +167,6 @@ def extract_gear(raw_can_response):
         gear_str = gear_str + "N"
     if gear_bits & 0x8: # 4th bit is 1
         gear_str = gear_str + "D"
-    if gear_bits & 0x10: # 5th bit is 1
-        gear_str = gear_str + "B"
 
     return gear_str
 
