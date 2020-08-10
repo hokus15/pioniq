@@ -400,40 +400,41 @@ BMS (Battery Management System) information is published from `obdii_data.py` sc
 
 ```
 {
-   timestamp                       integer. Linux Epoch time.
-   socBms                          float (0-100). Battery status of charge in % (as seen by Battery Management System).
-   socDisplay                      integer (0-100). Battery status of charge in % (as seen as in car display).
-   soh                             float (0-100). Battery status of health in %.
-   bmsIgnition                     0 or 1. Car ignition. 0: false, 1: true.
-   bmsMainRelay                    0 or 1. BMS main relay. 0: false, 1: true.
-   auxBatteryVoltage               float. Aux battery voltage in V.
-   charging                        0 or 1. Is the car charging ? 0: false, 1: true.
-   normalChargePort                0 or 1. Is charging using normal charge port? 0: false, 1: true.
-   rapidChargePort                 0 or 1. Is charging using rapid charge port? 0: false, 1: true.
-   fanStatus                       integer (0-9). Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
-   fanFeedback                     integer. Fan feedback signal in Hz.
-   cumulativeEnergyCharged         float. Cumulative energy charged in kWh.
-   cumulativeEnergyDischarged      float. Cumulative energy discharged in kWh.
-   cumulativeChargeCurrent         float. Cumulative current charged in A.
-   cumulativeDischargeCurrent      float. Cumulative current discharged in A.
-   availableChargePower            float. Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   availableDischargePower         float. Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   dcBatteryCellVoltageDeviation   integer. DC battery cell voltage deviation in V.
-   dcBatteryHeater1Temperature     float. DC battery heater1 temperature in ºC.
-   dcBatteryHeater2Temperature     float. DC battery heater2 temperature in ºC.
-   dcBatteryInletTemperature       integer. DC battery inlet temperature in ºC.
-   dcBatteryMaxTemperature         integer. DC battery maximum cell temperature in ºC.
-   dcBatteryMinTemperature         integer. DC battery minimum cell temperature in ºC.
-   dcBatteryAvgTemperature         integer. DC battery average cells temperature in ºC.
-   dcBatteryCellNoMaxDeterioration integer. DC battery maximium deterioration cell number.
-   dcBatteryCellMinDeterioration   integer. DC battery minimum deterioration cell number.
-   dcBatteryCellNoMinDeterioration float. DC battery minimum deterioration cell in %.
-   dcBatteryCurrent                float. DC battery instant current in A.
-   dcBatteryPower                  float. DC battery instant power in kW.
-   dcBatteryVoltage                float. DC battery instant  voltage in V.
-   dcBatteryModuleTempxx           float. DC battery module temperature in ºC. Where xx goes from 01 to 12.
-   dcBatteryCellVoltagexx          float. DC battery cell voltage in V. Where xx goes from 01 to 96.
-   driveMotorSpeed                 integer. Motor speed in RPM.
+   timestamp                       integer         Linux Epoch time.
+   socBms                          float (0-100)   Battery status of charge in % (as seen by Battery Management System).
+   socDisplay                      integer (0-100) Battery status of charge in % (as seen as in car display).
+   soh                             float (0-100)   Battery status of health in %.
+   bmsIgnition                     0 or 1          Car ignition. 0: false, 1: true.
+   bmsMainRelay                    0 or 1          BMS main relay. 0: false, 1: true.
+   auxBatteryVoltage               float           Aux battery voltage in V.
+   charging                        0 or 1          Is the car charging ? 0: false, 1: true.
+   normalChargePort                0 or 1          Is charging using normal charge port? 0: false, 1: true.
+   rapidChargePort                 0 or 1          Is charging using rapid charge port? 0: false, 1: true.
+   fanStatus                       integer (0-9)   Cooling fan speed. 0 means stopped. 1 to 9 lower to higher speed.
+   fanFeedback                     integer         Fan feedback signal in Hz.
+   cumulativeEnergyCharged         float           Cumulative energy charged in kWh.
+   cumulativeEnergyDischarged      float           Cumulative energy discharged in kWh.
+   cumulativeChargeCurrent         float           Cumulative current charged in A.
+   cumulativeDischargeCurrent      float           Cumulative current discharged in A.
+   availableChargePower            float           Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   availableDischargePower         float           Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   dcBatteryCellVoltageDeviation   integer         DC battery cell voltage deviation in V.
+   dcBatteryHeater1Temperature     float           DC battery heater1 temperature in ºC.
+   dcBatteryHeater2Temperature     float           DC battery heater2 temperature in ºC.
+   dcBatteryInletTemperature       integer         DC battery inlet temperature in ºC.
+   dcBatteryMaxTemperature         integer         DC battery maximum cell temperature in ºC.
+   dcBatteryMinTemperature         integer         DC battery minimum cell temperature in ºC.
+   dcBatteryAvgTemperature         integer         DC battery average cells temperature in ºC.
+   dcBatteryCellMaxDeterioration   float           DC battery maximum deterioration cell in %.
+   dcBatteryCellNoMaxDeterioration integer         DC battery maximium deterioration cell number.
+   dcBatteryCellMinDeterioration   float           DC battery minimum deterioration cell in %.
+   dcBatteryCellNoMinDeterioration integer         DC battery minimum deterioration cell number.
+   dcBatteryCurrent                float           DC battery instant current in A.
+   dcBatteryPower                  float           DC battery instant power in kW.
+   dcBatteryVoltage                float           DC battery instant  voltage in V.
+   dcBatteryModuleTempxx           float           DC battery module temperature in ºC. Where xx goes from 01 to 12.
+   dcBatteryCellVoltagexx          float           DC battery cell voltage in V. Where xx goes from 01 to 96.
+   driveMotorSpeed                 integer         Motor speed in RPM.
 }
 ```
 
@@ -465,6 +466,7 @@ Sample:
    "dcBatteryMaxTemperature":28,
    "dcBatteryMinTemperature":26,
    "dcBatteryAvgTemperature":27,
+   "dcBatteryCellMaxDeterioration": 0,
    "dcBatteryCellNoMaxDeterioration": 2,
    "dcBatteryCellMinDeterioration": 100.0,
    "dcBatteryCellNoMinDeterioration": 10,
@@ -588,8 +590,8 @@ Odometer information is published from `obdii_data.py` script in the `config['mq
 
 ```
 {
-   timestamp integer. Linux Epoch time.
-   odometer  integer. Odometer value in Km.
+   timestamp integer Linux Epoch time.
+   odometer  integer Odometer value in Km.
 }
 ```
 
@@ -606,10 +608,10 @@ Vehicle Motor Control System information is published from `obdii_data.py` scrip
 
 ```
 {
-   timestamp integer. Linux Epoch time.
-   vin       string. Vehicle Identification Number, also called a chassis number (or número de bastidor in spanish).
-   gear      string. Gear stick position. P = Park, N = Neutral, D = Drive, R = Rear or B = engine braking
-   kmh       float. Vehicle speed in kmh
+   timestamp integer Linux Epoch time.
+   vin       string  Vehicle Identification Number, also called a chassis number (or número de bastidor in spanish).
+   gear      string  Gear stick position. P = Park, N = Neutral, D = Drive, R = Rear or B = engine braking
+   kmh       float   Vehicle speed in kmh
 }
 ```
 
@@ -628,15 +630,15 @@ Tire Pressure Monitor System information is published from `obdii_data.py` scrip
 
 ```
 {
-   timestamp          integer. Linux Epoch time.
-   tire_fl_pressure    float. Front left tire pressure in psi.
-   tire_fl_temperature integer. Front left tire temperature in ºC.
-   tire_fr_pressure    float. Front right tire pressure in psi.
-   tire_fr_temperature integer. Front right tire temperature in ºC.
-   tire_bl_pressure    float. Back left tire pressure in psi.
-   tire_bl_temperature integer. Back left tire temperature in ºC.
-   tire_br_pressure    float. Back right tire pressure in psi.
-   tire_br_temperature integer. Back right tire temperature in ºC.
+   timestamp           integer Linux Epoch time.
+   tire_fl_pressure    float   Front left tire pressure in psi.
+   tire_fl_temperature integer Front left tire temperature in ºC.
+   tire_fr_pressure    float   Front right tire pressure in psi.
+   tire_fr_temperature integer Front right tire temperature in ºC.
+   tire_bl_pressure    float   Back left tire pressure in psi.
+   tire_bl_temperature integer Back left tire temperature in ºC.
+   tire_br_pressure    float   Back right tire pressure in psi.
+   tire_br_temperature integer Back right tire temperature in ºC.
 }
 ```
 
@@ -660,8 +662,8 @@ External temperature information is published from `obdii_data.py` script in the
 
 ```
 {
-   timestamp            integer. Linux Epoch time.
-   external_temperature float. External temperature in ºC.
+   timestamp            integer Linux Epoch time.
+   external_temperature float   External temperature in ºC.
 }
 ```
 
@@ -677,21 +679,21 @@ Sample:
 Location information is published from `gps_data.py` script in the `config['mqtt']['topic_prefix']location` i.e.: `car/sensor/ioniq/location` as a JSON object with the following format:
 ```
 {
-    latitude     float. Latitude.
-    longitude    float. Longitude.
-    last_update  float. Linux Epoch time.
-    gps_accuracy float. Max of latitude or longitude estimated error.
-    platitude    float. Latitude fixed on last iteration.
-    plongitude   float. Longitude fixed on last iteration.
-    track        float. Course over ground in degrees from True North.
-    speed        float. Speed in m/s.
-    epx          float. Estimated longitude error.
-    epy          float. Estimated latitude error.
-    epv          float. Estimated altitude error.
-    ept          float. Estimated time error.
-    eps          float. Estimated Speed error.
-    mode         float. NMEA mode; values are: 0 - NA, 1 - No Fix, 2D and 3D.
-    climb        float. Climb (Positive) or Sink (Negative) rate in m/s of upwards or downwards movement.
+    latitude     float Latitude.
+    longitude    float Longitude.
+    last_update  float Linux Epoch time.
+    gps_accuracy float Max of latitude or longitude estimated error.
+    platitude    float Latitude fixed on last iteration.
+    plongitude   float Longitude fixed on last iteration.
+    track        float Course over ground in degrees from True North.
+    speed        float Speed in m/s.
+    epx          float Estimated longitude error.
+    epy          float Estimated latitude error.
+    epv          float Estimated altitude error.
+    ept          float Estimated time error.
+    eps          float Estimated Speed error.
+    mode         float NMEA mode; values are: 0 - NA, 1 - No Fix, 2D and 3D.
+    climb        float Climb (Positive) or Sink (Negative) rate in m/s of upwards or downwards movement.
 }
 ```
 
