@@ -429,10 +429,14 @@ BMS (Battery Management System) information is published from `obdii_data.py` sc
    dcBatteryMaxTemperature         integer         DC battery maximum cell temperature in ºC.
    dcBatteryMinTemperature         integer         DC battery minimum cell temperature in ºC.
    dcBatteryAvgTemperature         integer         DC battery average cells temperature in ºC.
-   dcBatteryCellMaxDeterioration   float           DC battery maximum deterioration cell in %.
-   dcBatteryCellNoMaxDeterioration integer         DC battery maximium deterioration cell number.
-   dcBatteryCellMinDeterioration   float           DC battery minimum deterioration cell in %.
-   dcBatteryCellNoMinDeterioration integer         DC battery minimum deterioration cell number.
+   dcBatteryCellMaxVoltage         float           DC battery maximum voltage in V.
+   dcBatteryCellNoMaxVoltage       integer (1-96)  DC battery maximum voltage cell number.
+   dcBatteryCellMaxDeterioration   float (0-100)   DC battery maximum deterioration cell in %.
+   dcBatteryCellNoMaxDeterioration integer (1-96)  DC battery maximium deterioration cell number.
+   dcBatteryCellMinVoltage         float           DC battery minimum voltage in V.
+   dcBatteryCellNoMinVoltage       integer (1-96)  DC battery minimum voltage cell number.
+   dcBatteryCellMinDeterioration   float (0-100)   DC battery minimum deterioration cell in %.
+   dcBatteryCellNoMinDeterioration integer (1-96)  DC battery minimum deterioration cell number.
    dcBatteryCurrent                float           DC battery instant current in A.
    dcBatteryPower                  float           DC battery instant power in kW.
    dcBatteryVoltage                float           DC battery instant  voltage in V.
