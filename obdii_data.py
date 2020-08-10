@@ -514,7 +514,11 @@ if __name__ == '__main__':
         logger.info("=== Script start ===")
         
         # Add state data to messages array
-        mqtt_msgs.extend([{'topic':topic_prefix + "state", 'payload':"ON", 'qos':0, 'retain':True}])
+        state_info = {
+            'timestamp': int(round(time.time())),
+            'state': 'running'
+        }
+        mqtt_msgs.extend([{'topic':topic_prefix + "state", 'payload':json.dumps(state_info), 'qos':0, 'retain':True}])
         
         obd.logger.setLevel(obd.logging.DEBUG)
         # Remove obd logger existing handlers

@@ -386,16 +386,26 @@ In my case I use the [Huawei E3372 LTE stick](https://www.amazon.es/Huawei-USB-S
 
 ## JSON format
 
-The battery, odometer and location information is published in MQTT as a string or a JSON object, depending on the information published.
+The information is published in MQTT as a JSON object.
 
 Those are the MQTT topics and format used for each one:
 
 ### state
-Car state is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']state` i.e.: `car/sensor/ioniq/state` as "ON" constant.
+This information may be useful to know that the script is running and last time it run. State is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']state` i.e.: `car/sensor/ioniq/state` as a JSON object with the following format:
+
+```
+{
+   timestamp integer Linux Epoch time.
+   state     string  Constant string with the "running" value
+}
+```
 
 Sample:
 ```
-ON
+{
+    "timestamp": 1597091185,
+    "state": "running"
+}
 ```
 
 ### battery
