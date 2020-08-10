@@ -235,12 +235,28 @@ def query_battery_information():
         dcBatteryCurrent = bytes_to_int_signed(raw_2101.value[12:14]) / 10.0
         dcBatteryVoltage = bytes_to_int(raw_2101.value[14:16]) / 10.0
         
+        dcBatteryCellMaxDeterioration = bytes_to_int(raw_2105.value[27:29]) / 10.0
+        dcBatteryCellMinDeterioration = bytes_to_int(raw_2105.value[30:32]) / 10.0
+        socDisplay = int(raw_2105.value[33] / 2.0)
+        
         mins_to_complete = 0
+        
+        # Calculate time to 100% charge
         if charging == 1: 
-            missing_pct = 100-(int(raw_2105.value[33] / 2.0))
-            missing_wh = (battery_capacity * 1000) * (missing_pct / 100)
+            average_deterioration = (dcBatteryCellMaxDeterioration + dcBatteryCellMinDeterioration) / 2.0
+            logger.debug("--------------------------------------------- average_deterioration: {}".format(average_deterioration))
+            lost_soh = 100 - average_deterioration
+            logger.debug("--------------------------------------------- lost_soh: {}".format(lost_soh))
+            lost_wh = (battery_capacity * 1000) * (lost_soh / 100)
+            logger.debug("--------------------------------------------- lost_wh: {}".format(lost_wh))
+            remaining_pct = 100 - socDisplay
+            logger.debug("--------------------------------------------- remaining_pct: {}".format(remaining_pct))
+            remaining_wh = ((battery_capacity * 1000) - lost_wh) * (remaining_pct / 100)
+            logger.debug("--------------------------------------------- remaining_wh: {}".format(remaining_wh))
             charge_power = abs((dcBatteryCurrent * dcBatteryVoltage))
-            mins_to_complete = int((missing_wh / charge_power) * 60)
+            logger.debug("--------------------------------------------- charge_power: {}".format(charge_power))
+            mins_to_complete = int((remaining_wh / charge_power) * 60)
+            logger.debug("--------------------------------------------- mins_to_complete: {}".format(mins_to_complete))
 
         moduleTemps = [
             bytes_to_int_signed(raw_2101.value[18:19]), #  0
@@ -265,7 +281,7 @@ def query_battery_information():
             'timestamp':                       int(round(time.time())),
 
             'socBms':                          raw_2101.value[6] / 2.0, # %
-            'socDisplay':                      int(raw_2105.value[33] / 2.0), # %
+            'socDisplay':                      socDisplay, # %
             'soh':                             soh, # %
 
             'bmsIgnition':                     1 if raw_2101.value[52] & 0x4 else 0, # 3rd bit is 1 
@@ -299,11 +315,11 @@ def query_battery_information():
             'dcBatteryMinTemperature':         bytes_to_int_signed(raw_2101.value[17:18]), # C
             'dcBatteryCellMaxVoltage':         raw_2101.value[25] / 50, # V
             'dcBatteryCellNoMaxVoltage':       raw_2101.value[26],
-            'dcBatteryCellMaxDeterioration':   bytes_to_int(raw_2105.value[27:29]) / 10.0, # %
+            'dcBatteryCellMaxDeterioration':   dcBatteryCellMaxDeterioration, # %
             'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
             'dcBatteryCellMinVoltage':         raw_2101.value[27] / 50, # V
             'dcBatteryCellNoMinVoltage':       raw_2101.value[28],
-            'dcBatteryCellMinDeterioration':   bytes_to_int(raw_2105.value[30:32]) / 10.0, # %
+            'dcBatteryCellMinDeterioration':   dcBatteryCellMinDeterioration, # %
             'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
             'dcBatteryCurrent':                dcBatteryCurrent, # A
             'dcBatteryPower':                  dcBatteryCurrent * dcBatteryVoltage / 1000.0, # kW
@@ -434,7 +450,7 @@ def query_external_temperature():
     query_command(cmd_can_receive_address_7ee)
     # Query external temeprature
     ext_temp = query_command(cmd_ext_temp)
-    # Only set odometer data if present. Not available when car engine is off
+    # Only set temperature data if present.
     if 'ext_temp' in locals() and ext_temp is not None and ext_temp.value is not None:
         logger.info("**** Got external temperature value ****")
         ext_temp_info['external_temperature'] = (ext_temp.value[14]-80) / 2.0 # C
