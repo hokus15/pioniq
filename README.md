@@ -639,13 +639,13 @@ Tire Pressure Monitor System information is published from `obdii_data.py` scrip
 ```
 {
    timestamp           integer Linux Epoch time.
-   tire_fl_pressure    float   Front left tire pressure in psi.
+   tire_fl_pressure    float   Front left tire pressure in bar.
    tire_fl_temperature integer Front left tire temperature in ºC.
-   tire_fr_pressure    float   Front right tire pressure in psi.
+   tire_fr_pressure    float   Front right tire pressure in bar.
    tire_fr_temperature integer Front right tire temperature in ºC.
-   tire_bl_pressure    float   Back left tire pressure in psi.
+   tire_bl_pressure    float   Back left tire pressure in bar.
    tire_bl_temperature integer Back left tire temperature in ºC.
-   tire_br_pressure    float   Back right tire pressure in psi.
+   tire_br_pressure    float   Back right tire pressure in bar.
    tire_br_temperature integer Back right tire temperature in ºC.
 }
 ```
