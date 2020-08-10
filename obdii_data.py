@@ -290,6 +290,7 @@ def query_battery_information():
             'dcBatteryInletTemperature':       bytes_to_int_signed(raw_2101.value[22:23]), # C
             'dcBatteryMaxTemperature':         bytes_to_int_signed(raw_2101.value[16:17]), # C
             'dcBatteryMinTemperature':         bytes_to_int_signed(raw_2101.value[17:18]), # C
+            'dcBatteryCellMaxDeterioration':   bytes_to_int(raw_2105.value[27:29]) / 10.0, # %
             'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
             'dcBatteryCellMinDeterioration':   bytes_to_int(raw_2105.value[30:32]) / 10.0, # %
             'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
