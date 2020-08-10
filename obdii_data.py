@@ -266,7 +266,7 @@ def query_battery_information():
             'bmsMainRelay':                    1 if chargingBits & 0x1 else 0, # 1st bit is 1 
             'auxBatteryVoltage':               raw_2101.value[31] / 10.0, # V
 
-            'charging':                        charging
+            'charging':                        charging,
             'normalChargePort':                1 if chargingBits & 0x20 else 0, # 6th bit is 1
             'rapidChargePort':                 1 if chargingBits & 0x40 else 0, # 7th bit is 1
 
@@ -394,16 +394,16 @@ def query_tpms_information():
         tpms_info.update({
             'timestamp': int(round(time.time())),
             'tire_fl_pressure':    raw_tpms.value[7] * 0.2, # psi - Front Left
-            'tire_fl_temperature': raw_tpms.value[8] - 55, # C - Front Left
+            'tire_fl_temperature': raw_tpms.value[8] - 55,  # C   - Front Left
             
             'tire_fr_pressure':    raw_tpms.value[11] * 0.2, # psi - Front Right
-            'tire_fr_temperature': raw_tpms.value[12] - 55, # C - Front Right
-            
-            'tire_bl_pressure':    raw_tpms.value[15] * 0.2, # psi - Back Left
-            'tire_bl_temperature': raw_tpms.value[16] - 55, # C - Back Left
-            
-            'tire_br_pressure':    raw_tpms.value[19] * 0.2, # psi - Back Right
-            'tire_br_temperature': raw_tpms.value[20] - 55, # C - Back Right
+            'tire_fr_temperature': raw_tpms.value[12] - 55,  # C   - Front Right
+
+            'tire_bl_pressure':    raw_tpms.value[19] * 0.2, # psi - Back Left
+            'tire_bl_temperature': raw_tpms.value[20] - 55,  # C   - Back Left
+
+            'tire_br_pressure':    raw_tpms.value[15] * 0.2, # psi - Back Right
+            'tire_br_temperature': raw_tpms.value[16] - 55,  # C   - Back Right
             })
         logger.info("**** Got TPMS information ****")
     else:
