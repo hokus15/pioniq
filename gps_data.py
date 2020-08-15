@@ -111,6 +111,11 @@ if __name__ == '__main__':
         published_messages = 0
         while True:
             try:
+                location = {
+                    'last_update': int(round(time.time())),
+                    'state': 'running'
+                }
+
                 # It may take some seconds to get good data
                 logger.debug("Latitude error (EPY): +/- {} m".format(gpsd.fix.epy))
                 logger.debug("Longitude error (EPX): +/- {} m".format(gpsd.fix.epx))
@@ -118,7 +123,7 @@ if __name__ == '__main__':
                 logger.info("Location accuracy: +/- {} m".format(fix_accuracy))
                 if fix_accuracy < max_accuracy:
                     logger.debug("GPS position fixed with +/- {} m".format(fix_accuracy))
-                    location = {'latitude': gpsd.fix.latitude,
+                    location.update({'latitude': gpsd.fix.latitude,
                                 'longitude': gpsd.fix.longitude,
                                 'gps_accuracy': fix_accuracy,
                                 'eps': gpsd.fix.eps, # Estimated Speed error
@@ -129,9 +134,8 @@ if __name__ == '__main__':
                                 'speed': gpsd.fix.speed, # m/s
                                 'climb': gpsd.fix.climb, 
                                 'track': gpsd.fix.track,
-                                'mode': gpsd.fix.mode,
-                                'last_update': int(round(time.time()))
-                            }
+                                'mode': gpsd.fix.mode
+                            })
                     if previous_latitude != 0 and previous_logitude != 0:
                         # Previous latitude and longitude data is useful to measure distance travelled between updates.
                         location.update({
@@ -144,23 +148,25 @@ if __name__ == '__main__':
                     # Publish to MQTT
                     logger.debug("Publishing positon to MQTT...")
                     logger.debug("{}".format(json.dumps(location)))
-                    result = mqtt_client.publish(topic=topic_prefix + "location", payload=json.dumps(location), qos=0, retain=True)
-                    result.wait_for_publish()
-                    if (result.rc == 0): 
-                        logger.info("Message successfully published: " + str(result))
-                        published_messages += 1
-                    else:
-                        logger.error("Error publishing message: " + str(result))
     
     #                logger.debug("%s satellites in view" % len(gpsd.satellites))
     #                for sat in gpsd.satellites:
     #                    logger.debug("    %r" % sat)
                 else:
                     logger.warning("Location not accurate enought: it's +/- {} m but +/- {} m required".format(fix_accuracy, max_accuracy))
-                logger.debug("Waiting {} seconds...".format(sleep_time))
-                time.sleep(sleep_time)
             except Exception as ex:
                 logger.exception("Unexpected error: {}".format(ex))
+            finally:
+                result = mqtt_client.publish(topic=topic_prefix + "location", payload=json.dumps(location), qos=0, retain=True)
+                result.wait_for_publish()
+                if (result.rc == 0): 
+                    logger.info("Message successfully published: " + str(result))
+                    published_messages += 1
+                else:
+                    logger.error("Error publishing message: " + str(result))
+
+                logger.debug("Waiting {} seconds...".format(sleep_time))
+                time.sleep(sleep_time)
 
     except (KeyboardInterrupt, SystemExit):
         # when you press ctrl+c
