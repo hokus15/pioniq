@@ -323,7 +323,7 @@ def query_battery_information():
             'dcBatteryCellMinDeterioration':   dcBatteryCellMinDeterioration, # %
             'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
             'dcBatteryCurrent':                dcBatteryCurrent, # A
-            'dcBatteryPower':                  dcBatteryCurrent * dcBatteryVoltage / 1000.0, # kW
+            'dcBatteryPower':                  round(dcBatteryCurrent * dcBatteryVoltage / 1000.0, 3), # kW
             'dcBatteryVoltage':                dcBatteryVoltage, # V
             'dcBatteryAvgTemperature':         sum(moduleTemps) / len(moduleTemps), # C
 
