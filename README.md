@@ -430,8 +430,8 @@ BMS (Battery Management System) information is published from `obdii_data.py` sc
    cumulativeEnergyDischarged      float           Cumulative energy discharged in kWh.
    cumulativeChargeCurrent         float           Cumulative current charged in A.
    cumulativeDischargeCurrent      float           Cumulative current discharged in A.
-   availableChargePower            float           Max power supported for charging in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
-   availableDischargePower         float           Max discharge power in kW. It's a constant that may vary by car. For IONIQ Electric it's 98kW.
+   availableChargePower            float           Available charge power kW. In Ioniq EV max value is 98kW.
+   availableDischargePower         float           Available discharge power in kW. In Ioniq EV max value is 98kW.
    dcBatteryCellVoltageDeviation   integer         DC battery cell voltage deviation in V.
    dcBatteryHeater1Temperature     float           DC battery heater1 temperature in ºC.
    dcBatteryHeater2Temperature     float           DC battery heater2 temperature in ºC.
