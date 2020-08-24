@@ -7,9 +7,6 @@ If you test it and it works with Hybrid and PlugIn Hybrid versions (it should!) 
 
 TODO
 
-## Disclaimer
-This is my first python programming experience and I'm not a Linux expert so I'm pretty sure that the scripts may be far from efficient so don't be too hard with me when you find that I'm not following best practices neither doing things in the most optimal way. If you find that the scripts may be improved (I'm sure they are), just raise a PR with your improvements. Thanks!!
-
 ## Needed Hardware
 - [Raspberry Pi Zero W](https://www.amazon.es/Raspberry-Pi-Zero-wh/dp/B07BHMRTTY/ref=sr_1_5?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Raspberry+Pi+Zero+W&qid=1593189037&s=electronics&sr=1-5)
 - [LTE Stick Huawei E3372](https://www.amazon.es/Huawei-USB-Stick-E3372-Inal%C3%A1mbrica/dp/B013UURTL4/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=LTE+Stick+Huawei+E3372&qid=1593188977&s=electronics&sr=1-2)
@@ -325,7 +322,7 @@ Adapt them to your needs.
 ### Execute the Python Scripts
 
 To test if everything works and execute the first script run:
-1. Make sure all the wiring is properly done (see Wiring section abobe).
+1. Make sure all the wiring is properly done (see Wiring section above).
 2. The vehicle is switched on
 3. The Raspberry Pi has been connected to the car WiFi
 
@@ -664,13 +661,13 @@ Sample:
 ```
 {
    "timestamp":1596146085,
-   "tire_fl_pressure":37.2,
+   "tire_fl_pressure":2.7,
    "tire_fl_temperature":28,
-   "tire_fr_pressure":38.2
+   "tire_fr_pressure":2.6
    "tire_fr_temperature":28,
-   "tire_bl_pressure":37.8,
+   "tire_bl_pressure":2.6,
    "tire_bl_temperature":33,
-   "tire_br_pressure":39.0,
+   "tire_br_pressure":2.5,
    "tire_br_temperature":33,
 }
 ```
@@ -737,7 +734,7 @@ Sample:
 ```
 
 ## [OPTIONAL] Loggly installation
-As the Raspberry Pi will usually run in your car's WiFi it is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enought for the purpose of this project (200 MB/day and 7 days log retention).
+As the Raspberry Pi will usually run in your car's WiFi it is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enough for the purpose of this project (200 MB/day and 7 days log retention).
 
 Just create a free account in [Loggly](https://www.loggly.com/) and follow instructions on how to [Linux Log File Monitoring](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/file-monitoring.htm).
 
@@ -749,4 +746,15 @@ All this work has been possible by putting together different pieces like:
 - [EVNotiPi](https://github.com/EVNotify/EVNotiPi)
 - [OBD-PIDs-for-HKMC-EVs](https://github.com/JejuSoul/OBD-PIDs-for-HKMC-EVs)
 - [SoulEVSpy](https://github.com/langemand/SoulEVSpy)
+- [Open Vehicles](https://github.com/openvehicles/)
 - and of course lot of patience and [Google](https://www.google.com/)
+
+## Informal disclaimer
+Before you download and use this software consider this: Any car is a possibly lethal piece of machinery and you might hurt or kill yourself or others using it, or even paying attention to the displays instead of watching the road. Be extremely prudent!
+
+By even downloading this software, or the source code provided on GitHub, you agree to have completely understood this.
+
+This is my first python programming experience and I'm not a Linux expert so I'm pretty sure that the scripts may be far from efficient so don't be too hard with me when you find that I'm not following best practices neither doing things in the most optimal way. If you find that the scripts may be improved (I'm sure they are), just raise a PR with your improvements or contact me.
+
+## Disclaimer
+PIONIQ (“THE SOFTWARE”) IS PROVIDED AS IS. USE THE SOFTWARE AT YOUR OWN RISK. THE AUTHOR MAKE NO WARRANTIES AS TO PERFORMANCE OR FITNESS FOR A PARTICULAR PURPOSE, OR ANY OTHER WARRANTIES WHETHER EXPRESSED OR IMPLIED. NO ORAL OR WRITTEN COMMUNICATION FROM OR INFORMATION PROVIDED BY THE AUTHORS SHALL CREATE A WARRANTY. UNDER NO CIRCUMSTANCES SHALL THE AUTHORS BE LIABLE FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES RESULTING FROM THE USE, MISUSE, OR INABILITY TO USE THE SOFTWARE, EVEN IF THE AUTHOR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THESE EXCLUSIONS AND LIMITATIONS MAY NOT APPLY IN ALL JURISDICTIONS. YOU MAY HAVE ADDITIONAL RIGHTS AND SOME OF THESE LIMITATIONS MAY NOT APPLY TO YOU. THIS SOFTWARE IS ONLY INTENDED FOR SCIENTIFIC USAGE.
