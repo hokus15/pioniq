@@ -250,7 +250,7 @@ def query_battery_information():
             logger.debug("--------------------------------------------- lost_soh: {}".format(lost_soh))
             lost_wh = ((battery_capacity * 1000) * lost_soh) / 100
             logger.debug("--------------------------------------------- lost_wh: {}".format(lost_wh))
-            remaining_pct = 100 - (min(socBms,socDisplay))
+            remaining_pct = 100 - socDisplay
             logger.debug("--------------------------------------------- remaining_pct: {}".format(remaining_pct))
             remaining_wh = (((battery_capacity * 1000) - lost_wh) * remaining_pct) / 100
             logger.debug("--------------------------------------------- remaining_wh: {}".format(remaining_wh))
