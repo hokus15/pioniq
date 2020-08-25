@@ -740,14 +740,14 @@ Sample:
 }
 ```
 ## [BONUS] Monitor when charging
-One of the caveats of using the existing 12V plugs is that those are only powered when the car engine is on, meaning that it's not possible to monitor the status of the battery while tha car is charging.
+One of the caveats of using the existing 12V plugs is that those are only powered when the car engine is on, meaning that it's not possible to monitor the status of the battery while the car is charging.
 
-To be able to monitor the battery while the car is charging and not drain the 12V battery I've added a [new 12V plug](https://www.amazon.es/gp/product/B018OYOSHY/ref=ppx_yo_dt_b_asin_title_o09_s00?ie=UTF8&psc=1) that takes the power from the fuse box that it's ONLY active when the car engine is on and the car is charging.
+To be able to monitor the battery while the car is charging and not drain the 12V battery I've added a [new 12V plug](https://www.amazon.es/gp/product/B018OYOSHY/ref=ppx_yo_dt_b_asin_title_o09_s00?ie=UTF8&psc=1) that takes the power from the fuse box that it's ONLY active when the car engine is on or the car is charging.
 
 You can use the following fuse (IG3 2) to achieve this:
 ![Fuse box](https://raw.githubusercontent.com/hokus15/pioniq/master/fuse-box.jpg)
 
-In order to make it easy to take the power from the fuse box I've used the following [adaptor](https://es.aliexpress.com/item/4000127647948.html?spm=a2g0s.9042311.0.0.2ae863c0a3Juau)
+In order to make it easy to take the power from the fuse box I've used the following [adaptor](https://es.aliexpress.com/item/4000127647948.html?spm=a2g0s.9042311.0.0.2ae863c0a3Juau).
 
 ## [BONUS] Loggly installation
 As the Raspberry Pi will usually run in your car's WiFi it is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enough for the purpose of this project (200 MB/day and 7 days log retention).
