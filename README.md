@@ -5,7 +5,13 @@ If you test it and it works with Hybrid and PlugIn Hybrid versions (it should!) 
 
 ## Use cases
 
-TODO
+I have a smart home running [Home Assistant](https://home-assistant.io/) on a Raspberry Pi 4 4GB. This software can be easily plugged to a MQTT broker so it's pretty straight forward to extract and show the data or even configure automations.
+
+Here you have an screenshot of one of the tabs that I've configured for the car:
+![Home Assistant screenshot](https://raw.githubusercontent.com/hokus15/pioniq/master/home-assistant-mobile.jpg)
+
+You can check my [Home Assistant Configuration](https://github.com/hokus15/home-assistant-config) to get more details.
+
 
 ## Needed Hardware
 - [Raspberry Pi Zero W](https://www.amazon.es/Raspberry-Pi-Zero-wh/dp/B07BHMRTTY/ref=sr_1_5?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Raspberry+Pi+Zero+W&qid=1593189037&s=electronics&sr=1-5)
@@ -466,6 +472,7 @@ Sample:
    "charging":0,
    "normalChargePort":0,
    "rapidChargePort":0,
+   "minsToCompleteCharge": 0,
    "fanStatus":0,
    "fanFeedback":0,
    "cumulativeEnergyCharged":3029.8,
@@ -732,8 +739,17 @@ Sample:
    "plongitude":23.24253151,
 }
 ```
+## [BONUS] Monitor when charging
+One of the caveats of using the existing 12V plugs is that those are only powered when the car engine is on, meaning that it's not possible to monitor the status of the battery while tha car is charging.
 
-## [OPTIONAL] Loggly installation
+To be able to monitor the battery while the car is charging and not drain the 12V battery I've added a [new 12V plug](https://www.amazon.es/gp/product/B018OYOSHY/ref=ppx_yo_dt_b_asin_title_o09_s00?ie=UTF8&psc=1) that takes the power from the fuse box that it's ONLY active when the car engine is on and the car is charging.
+
+You can use the following fuse (IG3 2) to achieve this:
+![Fuse box](https://raw.githubusercontent.com/hokus15/pioniq/master/fuse-box.jpg)
+
+In order to make it easy to take the power from the fuse box I've used the following [adaptor](https://es.aliexpress.com/item/4000127647948.html?spm=a2g0s.9042311.0.0.2ae863c0a3Juau)
+
+## [BONUS] Loggly installation
 As the Raspberry Pi will usually run in your car's WiFi it is going to be complex for you to debug problems or even look at the log files. For that I'm using a Log Management tool in the cloud that offers a free tier that is more than enough for the purpose of this project (200 MB/day and 7 days log retention).
 
 Just create a free account in [Loggly](https://www.loggly.com/) and follow instructions on how to [Linux Log File Monitoring](https://documentation.solarwinds.com/en/Success_Center/loggly/Content/admin/file-monitoring.htm).
