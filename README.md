@@ -4,6 +4,7 @@ Extract OBDII data for Hyundai Ioniq EV - 28kWh, as well as the GPS location (us
 If you test it and it works with Hybrid and PlugIn Hybrid versions (it should!) let me know.
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/hokus15/pioniq?logo=github)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/hokus15/pioniq?logo=github)
 
 ## Use cases
 
