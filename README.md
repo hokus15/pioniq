@@ -3,6 +3,8 @@ Extract OBDII data for Hyundai Ioniq EV - 28kWh, as well as the GPS location (us
 
 If you test it and it works with Hybrid and PlugIn Hybrid versions (it should!) let me know.
 
+![GitHub last commit](https://img.shields.io/github/last-commit/hokus15/pioniq?logo=github)
+
 ## Use cases
 
 I have a smart home running [Home Assistant](https://home-assistant.io/) on a Raspberry Pi 4 4GB. This software can be easily plugged to a MQTT broker so it's pretty straight forward to extract and show the data or even configure automations.
