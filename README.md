@@ -1,11 +1,8 @@
-# pioniq
+# pioniq ![License](https://img.shields.io/github/license/hokus15/pioniq) ![GitHub last commit](https://img.shields.io/github/last-commit/hokus15/pioniq?logo=github) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/hokus15/pioniq?logo=github)
+
 Extract OBDII data for Hyundai Ioniq EV - 28kWh, as well as the GPS location (using an external USB device) and publishes it to MQTT broker using a Raspberry Pi Zero W.
 
 If you test it and it works with Hybrid and PlugIn Hybrid versions (it should!) let me know.
-
-![License](https://img.shields.io/github/license/hokus15/pioniq)
-![GitHub last commit](https://img.shields.io/github/last-commit/hokus15/pioniq?logo=github)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/hokus15/pioniq?logo=github)
 
 ## Use cases
 
