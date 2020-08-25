@@ -117,7 +117,7 @@ pip install paho-mqtt obd
 ```
 
 ### Pairing OBDII Bluetooth Dongle with Raspberry Pi
-**IMPORTANT** Next requirements need to be met to pair the OBDII bluetooth with the Raspberry Pi:
+**IMPORTANT** Following requirements need to be met to pair the OBDII bluetooth with the Raspberry Pi:
 1. OBDII dongle is plugged into the OBDII port of your car
 2. Raspberry Pi is within the range of the OBDII bluetooth dongle (<5m)
 3. Raspberry Pi is connected to the Wi-Fi. I use a powerbank to give power the Raspberry Pi when its close to the car. In my case using the USB car charger makes the RaspberryPi to be out of WiFi range.
@@ -168,7 +168,7 @@ Then reboot the Raspberry Pi
 sudo reboot
 ```
 
-### [OPTIONAL] Configuring the GPS
+### Configuring the GPS
 Do this step **ONLY** if you plan to use the USB GPS device to publish your car's location.
 
 Install needed python packages:
@@ -255,7 +255,7 @@ H.10- 04/25/2019 115","activated":"2020-07-01T17:03:24.423Z","flags":1,"native":
 "eps":20.21,"epc":38.25}
 ```
 
-If you are not getting GPS coordinates something may be wrong. Please google for some information.
+If you are not getting GPS coordinates something may be wrong. Please google for some troubleshooting.
 
 ### Wiring
 
@@ -277,7 +277,7 @@ cd ~
 git clone https://github.com/hokus15/pioniq.git
 ```
 
-### Config files format
+### Config files
 
 Config files are JSON files and should be created to run the scripts. You have a template file for each of the scripts:
 
@@ -330,7 +330,7 @@ Adapt them to your needs.
 
 ### Execute the Python Scripts
 
-To test if everything works and execute the first script run:
+To test that everything works, execute the first script:
 1. Make sure all the wiring is properly done (see Wiring section above).
 2. The vehicle is switched on
 3. The Raspberry Pi has been connected to the car WiFi
@@ -356,7 +356,7 @@ And configure the following cron job:
 * * * * * python /home/pi/pioniq/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
 ```
 
-### [OPTIONAL] Run automatically GPS data script
+### Run automatically GPS data script
 
 Do this step **ONLY** if you plan to use the USB GPS device to publish your car's location.
 
@@ -373,14 +373,14 @@ WorkingDirectory=/home/pi/
 User=pi
 Type=idle
 ExecStart=/usr/bin/python /home/pi/pioniq/gps_data.py
-# Redirect stderr to /dev/null to avoid logging twice (once from log file and another from stderr (StreamHandler)) to loggly
+# Redirect stderr to /dev/null to avoid logging twice to loggly (once from log file and another from stderr (StreamHandler))
 StandardError=null
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-Then we need to enable the service like this:
+Enable the service like this:
 ```
 sudo systemctl daemon-reload
 sudo systemctl enable gps_data.service
@@ -392,12 +392,12 @@ In my case I use the [Huawei E3372 LTE stick](https://www.amazon.es/Huawei-USB-S
 
 ## JSON format
 
-The information is published in MQTT as a JSON object.
+The information is published in MQTT in different topics as a JSON objects.
 
 Those are the MQTT topics and format used for each one:
 
 ### state
-This information may be useful to know that the script is running and last time it run. State is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']state` i.e.: `car/sensor/ioniq/state` as a JSON object with the following format:
+This information may be useful to know that the script is running and last time it ran. State topic is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']state` i.e.: `car/sensor/ioniq/state` as a JSON object with the following format:
 
 ```
 {
@@ -648,7 +648,7 @@ Sample:
 {
    "timestamp":1594994497,
    "vin":"XXXXXXXXXXXXXXXXXX",
-   "gear": "P",
+   "gear": "D",
    "speed": 67.0,
    "accel_pedal_depth": 28,
    "brake_lamp": 0,
