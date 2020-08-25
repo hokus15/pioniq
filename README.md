@@ -630,10 +630,13 @@ Vehicle Motor Control System information is published from `obdii_data.py` scrip
 
 ```
 {
-   timestamp integer Linux Epoch time.
-   vin       string  Vehicle Identification Number, also called a chassis number (or número de bastidor in spanish).
-   gear      string  Gear stick position. P = Park, N = Neutral, D = Drive or R = Rear
-   kmh       float   Vehicle speed in kmh
+   timestamp         integer Linux Epoch time.
+   vin               string  Vehicle Identification Number, also called a chassis number (or número de bastidor in spanish).
+   gear              string  Gear stick position. P = Park, N = Neutral, D = Drive or R = Rear.
+   speed             float   Vehicle speed in kmh.
+   accel_pedal_depth integer Accelerator pedal depth in %.
+   brake_lamp        0 or 1  0 brake lamp is off, 1 brake lamp is on.
+   brakes_on         0 or 1  0 brakes are off, 1 brakes are on.
 }
 ```
 
@@ -642,8 +645,11 @@ Sample:
 {
    "timestamp":1594994497,
    "vin":"XXXXXXXXXXXXXXXXXX",
-   "gear": "P"
-   "kmh": 67.0
+   "gear": "P",
+   "speed": 67.0,
+   "accel_pedal_depth": 28,
+   "brake_lamp": 0,
+   "brakes_on": 0
 }
 ```
 
