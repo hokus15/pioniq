@@ -1,0 +1,16 @@
+[Unit]
+Description=Publish GPS data to MQTT service
+Wants=gpsd.service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+WorkingDirectory=/opt/pioniq
+User=pi
+Type=idle
+ExecStart=/usr/bin/python /opt/pioniq/gps_data.py
+# Redirect stderr to /dev/null to avoid logging twice to loggly (once from log file and another from stderr (StreamHandler))
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
