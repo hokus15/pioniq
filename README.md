@@ -111,7 +111,6 @@ sudo reboot
 Then install needed packages for the scripts to run:
 ```
 sudo apt-get install bluetooth bluez-tools blueman python python-pip git python-gps
-pip install paho-mqtt obd
 ```
 
 ### Pairing OBDII Bluetooth Dongle with Raspberry Pi
@@ -267,19 +266,27 @@ If you are not getting GPS coordinates something may be wrong. Please google for
 
 Now that we can stablish connection with OBDII dongle and the GPS is working we can install the scripts that will do all the magic!
 
-Maybe it's not the best practise but I install the scripts in the pi home directory `/home/pi`.
-
-To do so clone the Github repo:
+Clone the Github repo:
 ```
-cd ~
-git clone https://github.com/hokus15/pioniq.git
+sudo git clone https://github.com/hokus15/pioniq.git /opt/pioniq
+```
+
+Make pi user the owner of `/opt/pioniq` folder:
+```
+sudo chown -R pi /opt/pioniq
+```
+
+Install dependencies:
+```
+cd /opt/pioniq
+pip install -r requirements.txt
 ```
 
 ### Config files
 
 Config files are JSON files and should be created to run the scripts. You have a template file for each of the scripts:
 
-pioniq/obdii_data.config.json file format:
+`obdii_data.config.json` file format:
 ```
 {
     mqtt: {               object  MQTT configuration section.
@@ -299,7 +306,7 @@ pioniq/obdii_data.config.json file format:
 }
 ```
 
-pioniq/gps_data.config.json file format:
+`gps_data.config.json` file format:
 ```
 {
     mqtt: {               object. MQTT configuration section.
@@ -318,10 +325,12 @@ pioniq/gps_data.config.json file format:
 
 ### Prepare config files
 
+Make sure you are in `/opt/pioniq` folder.
+
 Copy config files from template.
 ```
-cp pioniq/obdii_data.config.template.json pioniq/obdii_data.config.json
-cp pioniq/gps_data.config.template.json pioniq/gps_data.config.json
+cp obdii_data.config.template.json obdii_data.config.json
+cp gps_data.config.template.json gps_data.config.json
 ```
 
 Adapt them to your needs.
@@ -335,7 +344,7 @@ To test that everything works, execute the first script:
 
 Run the command:
 ```
-python pioniq/obdii_data.py
+python /opt/pioniq/obdii_data.py
 ```
 
 This should publish obdii information to the configured MQTT server.
@@ -351,7 +360,7 @@ crontab -e
 
 And configure the following cron job:
 ```
-* * * * * python /home/pi/pioniq/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
+* * * * * python /opt/pioniq/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
 ```
 
 ### Run automatically GPS data script
@@ -360,28 +369,11 @@ Do this step **ONLY** if you plan to use the USB GPS device to publish your car'
 
 To run the `gps_data.py` script automatically we need to set it up as a service, to do so:
 
-Create a file called `gps_data.service` in `/etc/systemd/system` folder with the following content:
-```
-[Unit]
-Description=Publish GPS data to MQTT
-After=network-online.target
-
-[Service]
-WorkingDirectory=/home/pi/
-User=pi
-Type=idle
-ExecStart=/usr/bin/python /home/pi/pioniq/gps_data.py
-# Redirect stderr to /dev/null to avoid logging twice to loggly (once from log file and another from stderr (StreamHandler))
-StandardError=null
-
-[Install]
-WantedBy=multi-user.target
-```
-
 Enable the service like this:
 ```
-sudo systemctl daemon-reload
+sudo systemctl link /opt/pioniq/gps_data.service
 sudo systemctl enable gps_data.service
+sudo systemctl daemon-reload
 ```
 
 ## Car WiFi
