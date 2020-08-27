@@ -18,8 +18,8 @@ import time
 gpsd = None  # setting the global variable
 
 
-# MQTT function for on_publish callback
 def on_publish(client, userdata, mid):
+    """MQTT function for on_publish callback"""
     logger.debug("Publish message id: {}".format(mid))
     pass
 
