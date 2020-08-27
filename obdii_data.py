@@ -33,8 +33,8 @@ def bytes_to_int_signed(b):
     for by in b[1:]:
         n = n * 256 + by
     if b[0] & 0x80:  # if sign bit is set, 2's complement
-        bits = 8*len(b)
-        offset = 2**(bits-1)
+        bits = 8 * len(b)
+        offset = 2 ** (bits - 1)
         return n - offset
     else:
         return n
@@ -121,26 +121,26 @@ def can_response(can_message):
         offset = 3
         identifier = int(line[0:offset], 16)
 
-        frame_type = int(line[offset:offset+1], 16)
+        frame_type = int(line[offset:offset + 1], 16)
 
         if frame_type == 0:     # Single frame
-            data_len = int(line[offset+1:offset+2], 16)
-            data = bytes.fromhex(line[offset+2:data_len*2+offset+2])
+            data_len = int(line[offset + 1:offset + 2], 16)
+            data = bytes.fromhex(line[offset + 2:data_len * 2 + offset + 2])
             break
 
         elif frame_type == 1:   # First frame
-            data_len = int(line[offset+1:offset+4], 16)
-            data = bytearray.fromhex(line[offset+4:])
+            data_len = int(line[offset + 1:offset + 4], 16)
+            data = bytearray.fromhex(line[offset + 4:])
             last_idx = 0
 
         elif frame_type == 2:   # Consecutive frame
-            idx = int(line[offset+1:offset+2], 16)
+            idx = int(line[offset + 1:offset + 2], 16)
             if (last_idx + 1) % 0x10 != idx:
                 raise CanError("Bad frame order: last_idx({}) idx({})"
                                .format(last_idx, idx))
 
             frame_len = min(7, data_len - len(data))
-            data.extend(bytearray.fromhex(line[offset+2:frame_len*2+offset+2]))
+            data.extend(bytearray.fromhex(line[offset + 2:frame_len * 2 + offset + 2]))
             last_idx = idx
 
             if data_len == len(data):
@@ -166,7 +166,7 @@ def log_can_response(can_message):
 def extract_vin(raw_can_response):
     vin_str = ""
     for v in range(16, 33):
-        vin_str = vin_str + chr(bytes_to_int(raw_can_response.value[v:v+1]))
+        vin_str = vin_str + chr(bytes_to_int(raw_can_response.value[v:v + 1]))
     return vin_str
 
 
@@ -354,11 +354,11 @@ def query_battery_information():
             })
 
         for i, temp in enumerate(moduleTemps):
-            key = "dcBatteryModuleTemp{:02d}".format(i+1)
+            key = "dcBatteryModuleTemp{:02d}".format(i + 1)
             battery_info[key] = float(temp)
 
         for i, cvolt in enumerate(cellVoltages):
-            key = "dcBatteryCellVoltage{:02d}".format(i+1)
+            key = "dcBatteryCellVoltage{:02d}".format(i + 1)
             battery_info[key] = float(cvolt)
 
         logger.info("**** Got battery information ****")
@@ -482,7 +482,7 @@ def query_external_temperature():
     # Only set temperature data if present.
     if 'ext_temp' in locals() and ext_temp is not None and ext_temp.value is not None:
         logger.info("**** Got external temperature value ****")
-        ext_temp_info['external_temperature'] = (ext_temp.value[14]-80) / 2.0  # C
+        ext_temp_info['external_temperature'] = (ext_temp.value[14] - 80) / 2.0  # C
     else:
         raise ValueError("Could not get external temperature value")
     return ext_temp_info
@@ -509,6 +509,7 @@ def publish_data_mqtt(msgs):
         logger.info("{} message(s) published to MQTT".format(len(msgs)))
     except Exception as err:
         logger.error("Error publishing to MQTT: {}".format(err), exc_info=False)
+
 
 # main script
 if __name__ == '__main__':
