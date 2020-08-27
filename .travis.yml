@@ -3,7 +3,7 @@ python:
   - "2.7"
 # command to install dependencies
 install:
-  - pip install pep8
+  - pip install pycodestyle
 # command to run tests
 script:
-  - find . -name \*.py -exec pep8 --ignore=E501 {} +
+  - pycodestyle --show-source --show-pep8 --ignore=E501
