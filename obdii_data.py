@@ -45,7 +45,7 @@ def can_response(can_message):
     CAN response decoder.
     This function returns a bytearray containing ONLY the data.
     CAN response data format:
-    
+
     Single frame
     [0-3] Identifier
     [3-4] Frame type
@@ -53,14 +53,14 @@ def can_response(can_message):
     [4-5] Data length
     [5-19] Data. Keep in mind that data length may be shorter than the
                 length of the array, so you should read up to data length
-    
+
     First frame (multiple frames)
     [0-3] Identifier
     [3-4] Frame type
         Frame type: 1 = First frame (multiple frames)
     [4-7] Data length
     [7-19] Data
-    
+
     Consecutive frame
     [0-3] Identifier
     [3-4] Frame type
@@ -68,7 +68,7 @@ def can_response(can_message):
     [4-19] Data. Keep in mind that for last frame data length may be
                 shorter than the length of the array, so you should read
                 up to data length.
-    
+
     For example:
     Having the following CAN response frames:
     7EC103D6101FFFFFFFF
@@ -80,7 +80,7 @@ def can_response(can_message):
     7EC26007AD100007718
     7EC27005928B40D017F
     7EC280000000003E800
-    
+
     It will be decomposed as:
     7EC 1 03D 6101FFFFFFFF
     7EC 2 1 A9264826480300
@@ -91,12 +91,12 @@ def can_response(can_message):
     7EC 2 6 007AD100007718
     7EC 2 7 005928B40D017F
     7EC 2 8 0000000003E8 00
-    
+
     First frame:
     Identifier Frame type Data length (03D = 61 bytes) Data
     |         |          |                            |
     7EC        1          03D                          6101FFFFFFFF -> 6 bytes of data
-    
+
     Consecutive frames:
     Identifier Frame type Line index Data
     |         |          |          |
