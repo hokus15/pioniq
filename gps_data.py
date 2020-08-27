@@ -26,7 +26,7 @@ def on_publish(client, userdata, mid):
 
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
-        client.connected_flag=True  #set flag
+        client.connected_flag = True  # set flag
         logger.info("Successfully connected to MQTT")
     else:
         logger.error("Not connected to MQTT. Bad connection Returned code=", rc)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     console_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-3s %(levelname)-8s %(message)s"))
     console_handler.setLevel(logging.DEBUG)
     logger.addHandler(console_handler)
-    
+
     file_handler = logging.handlers.TimedRotatingFileHandler(os.path.dirname(os.path.realpath(__file__)) + '/gps_data.log',
                                                              when='midnight',
                                                              backupCount=15)  # sends output to gps_data.log file rotating it at midnight and storing latest 15 days
@@ -136,7 +136,7 @@ if __name__ == '__main__':
                                      'epv': gpsd.fix.epv,  # Estimated altitude error
                                      'ept': gpsd.fix.ept,  # Estimated time error
                                      'speed': gpsd.fix.speed,  # m/s
-                                     'climb': gpsd.fix.climb, 
+                                     'climb': gpsd.fix.climb,
                                      'track': gpsd.fix.track,
                                      'mode': gpsd.fix.mode
                             })
@@ -163,7 +163,7 @@ if __name__ == '__main__':
             finally:
                 result = mqtt_client.publish(topic=topic_prefix + "location", payload=json.dumps(location), qos=0, retain=True)
                 result.wait_for_publish()
-                if (result.rc == 0): 
+                if (result.rc == 0):
                     logger.info("Message successfully published: " + str(result))
                     published_messages += 1
                 else:
