@@ -15,7 +15,7 @@ import gps
 import threading
 import time
 
-gpsd = None # setting the global variable
+gpsd = None  # setting the global variable
 
 
 # MQTT function for on_publish callback
