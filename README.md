@@ -110,7 +110,7 @@ sudo reboot
 
 Then install needed packages for the scripts to run:
 ```
-sudo apt-get install bluetooth bluez-tools blueman python python-pip git python-gps
+sudo apt-get install bluetooth bluez-tools blueman python3-pip git
 ```
 
 ### Pairing OBDII Bluetooth Dongle with Raspberry Pi
@@ -168,7 +168,7 @@ sudo reboot
 ### Configuring the GPS
 Do this step **ONLY** if you plan to use the USB GPS device to publish your car's location.
 
-Install needed python packages:
+Install needed packages:
 ```
 sudo apt-get install gpsd gpsd-clients ntp
 ```
@@ -344,7 +344,7 @@ To test that everything works, execute the first script:
 
 Run the command:
 ```
-python /opt/pioniq/obdii_data.py
+python3 /opt/pioniq/obdii_data.py
 ```
 
 This should publish obdii information to the configured MQTT server.
@@ -360,7 +360,7 @@ crontab -e
 
 And configure the following cron job:
 ```
-* * * * * python /opt/pioniq/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
+* * * * * python3 /opt/pioniq/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
 ```
 
 ### Run automatically GPS data script

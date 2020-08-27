@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import ssl
 import time
@@ -24,20 +24,21 @@ class CanError(Exception):
     pass
 
 
+# Convert big-endian signed integer bytearray to int
 def bytes_to_int_signed(b):
-    '''Convert big-endian signed integer bytearray to int
-    int_from_bytes(b) == int.from_bytes(b, 'big', signed=True)'''
-    if not b:  # special-case 0 to avoid b[0] raising
-        return 0
-    n = b[0] & 0x7f  # skip sign bit
-    for by in b[1:]:
-        n = n * 256 + by
-    if b[0] & 0x80:  # if sign bit is set, 2's complement
-        bits = 8 * len(b)
-        offset = 2 ** (bits - 1)
-        return n - offset
-    else:
-        return n
+    return int.from_bytes(b, 'big', signed=True)
+# python 2.7 version below
+#    if not b:  # special-case 0 to avoid b[0] raising
+#        return 0
+#    n = b[0] & 0x7f  # skip sign bit
+#    for by in b[1:]:
+#        n = n * 256 + by
+#    if b[0] & 0x80:  # if sign bit is set, 2's complement
+#        bits = 8 * len(b)
+#        offset = 2 ** (bits - 1)
+#        return n - offset
+#    else:
+#        return n
 
 
 # CAN response decoder.
