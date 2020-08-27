@@ -139,7 +139,7 @@ if __name__ == '__main__':
                                      'climb': gpsd.fix.climb,
                                      'track': gpsd.fix.track,
                                      'mode': gpsd.fix.mode
-                            })
+                                     })
                     if previous_latitude != 0 and previous_logitude != 0:
                         # Previous latitude and longitude data is useful to measure distance travelled between updates.
                         location.update({
