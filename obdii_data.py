@@ -302,56 +302,56 @@ def query_battery_information():
                 cellVoltages.append(cmd.value[byte] / 50.0)
 
         battery_info.update({
-            'timestamp':                       int(round(time.time())),
+                             'timestamp':                       int(round(time.time())),
 
-            'socBms':                          socBms,  # %
-            'socDisplay':                      socDisplay,  # %
-            'soh':                             soh,  # %
+                             'socBms':                          socBms,  # %
+                             'socDisplay':                      socDisplay,  # %
+                             'soh':                             soh,  # %
 
-            'bmsIgnition':                     1 if raw_2101.value[52] & 0x4 else 0,  # 3rd bit is 1
-            'bmsMainRelay':                    1 if chargingBits & 0x1 else 0,  # 1st bit is 1
-            'auxBatteryVoltage':               raw_2101.value[31] / 10.0,  # V
+                             'bmsIgnition':                     1 if raw_2101.value[52] & 0x4 else 0,  # 3rd bit is 1
+                             'bmsMainRelay':                    1 if chargingBits & 0x1 else 0,  # 1st bit is 1
+                             'auxBatteryVoltage':               raw_2101.value[31] / 10.0,  # V
 
-            'charging':                        charging,
-            'normalChargePort':                1 if chargingBits & 0x20 else 0,  # 6th bit is 1
-            'rapidChargePort':                 1 if chargingBits & 0x40 else 0,  # 7th bit is 1
-            'minsToCompleteCharge':            mins_to_complete,  # Mins
+                             'charging':                        charging,
+                             'normalChargePort':                1 if chargingBits & 0x20 else 0,  # 6th bit is 1
+                             'rapidChargePort':                 1 if chargingBits & 0x40 else 0,  # 7th bit is 1
+                             'minsToCompleteCharge':            mins_to_complete,  # Mins
 
-            'fanStatus':                       raw_2101.value[29],  # Hz
-            'fanFeedback':                     raw_2101.value[30],
+                             'fanStatus':                       raw_2101.value[29],  # Hz
+                             'fanFeedback':                     raw_2101.value[30],
 
-            'cumulativeEnergyCharged':         bytes_to_int(raw_2101.value[40:44]) / 10.0,  # kWh
-            'cumulativeEnergyDischarged':      bytes_to_int(raw_2101.value[44:48]) / 10.0,  # kWh
+                             'cumulativeEnergyCharged':         bytes_to_int(raw_2101.value[40:44]) / 10.0,  # kWh
+                             'cumulativeEnergyDischarged':      bytes_to_int(raw_2101.value[44:48]) / 10.0,  # kWh
 
-            'cumulativeChargeCurrent':         bytes_to_int(raw_2101.value[32:36]) / 10.0,  # A
-            'cumulativeDischargeCurrent':      bytes_to_int(raw_2101.value[36:40]) / 10.0,  # A
+                             'cumulativeChargeCurrent':         bytes_to_int(raw_2101.value[32:36]) / 10.0,  # A
+                             'cumulativeDischargeCurrent':      bytes_to_int(raw_2101.value[36:40]) / 10.0,  # A
 
-            'cumulativeOperatingTime':         bytes_to_int(raw_2101.value[48:52]),  # seconds
+                             'cumulativeOperatingTime':         bytes_to_int(raw_2101.value[48:52]),  # seconds
 
-            'availableChargePower':            bytes_to_int(raw_2101.value[7:9]) / 100.0,  # kW
-            'availableDischargePower':         bytes_to_int(raw_2101.value[9:11]) / 100.0,  # kW
+                             'availableChargePower':            bytes_to_int(raw_2101.value[7:9]) / 100.0,  # kW
+                             'availableDischargePower':         bytes_to_int(raw_2101.value[9:11]) / 100.0,  # kW
 
-            'dcBatteryCellVoltageDeviation':   raw_2105.value[22] / 50,  # V
-            'dcBatteryHeater1Temperature':     float(raw_2105.value[25]),  # C
-            'dcBatteryHeater2Temperature':     float(raw_2105.value[26]),  # C
-            'dcBatteryInletTemperature':       bytes_to_int_signed(raw_2101.value[22:23]),  # C
-            'dcBatteryMaxTemperature':         bytes_to_int_signed(raw_2101.value[16:17]),  # C
-            'dcBatteryMinTemperature':         bytes_to_int_signed(raw_2101.value[17:18]),  # C
-            'dcBatteryCellMaxVoltage':         raw_2101.value[25] / 50,  # V
-            'dcBatteryCellNoMaxVoltage':       raw_2101.value[26],
-            'dcBatteryCellMaxDeterioration':   dcBatteryCellMaxDeterioration,  # %
-            'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
-            'dcBatteryCellMinVoltage':         raw_2101.value[27] / 50,  # V
-            'dcBatteryCellNoMinVoltage':       raw_2101.value[28],
-            'dcBatteryCellMinDeterioration':   dcBatteryCellMinDeterioration,  # %
-            'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
-            'dcBatteryCurrent':                dcBatteryCurrent,  # A
-            'dcBatteryPower':                  round(dcBatteryCurrent * dcBatteryVoltage / 1000.0, 3),  # kW
-            'dcBatteryVoltage':                dcBatteryVoltage,  # V
-            'dcBatteryAvgTemperature':         sum(moduleTemps) / len(moduleTemps),  # C
+                             'dcBatteryCellVoltageDeviation':   raw_2105.value[22] / 50,  # V
+                             'dcBatteryHeater1Temperature':     float(raw_2105.value[25]),  # C
+                             'dcBatteryHeater2Temperature':     float(raw_2105.value[26]),  # C
+                             'dcBatteryInletTemperature':       bytes_to_int_signed(raw_2101.value[22:23]),  # C
+                             'dcBatteryMaxTemperature':         bytes_to_int_signed(raw_2101.value[16:17]),  # C
+                             'dcBatteryMinTemperature':         bytes_to_int_signed(raw_2101.value[17:18]),  # C
+                             'dcBatteryCellMaxVoltage':         raw_2101.value[25] / 50,  # V
+                             'dcBatteryCellNoMaxVoltage':       raw_2101.value[26],
+                             'dcBatteryCellMaxDeterioration':   dcBatteryCellMaxDeterioration,  # %
+                             'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
+                             'dcBatteryCellMinVoltage':         raw_2101.value[27] / 50,  # V
+                             'dcBatteryCellNoMinVoltage':       raw_2101.value[28],
+                             'dcBatteryCellMinDeterioration':   dcBatteryCellMinDeterioration,  # %
+                             'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
+                             'dcBatteryCurrent':                dcBatteryCurrent,  # A
+                             'dcBatteryPower':                  round(dcBatteryCurrent * dcBatteryVoltage / 1000.0, 3),  # kW
+                             'dcBatteryVoltage':                dcBatteryVoltage,  # V
+                             'dcBatteryAvgTemperature':         sum(moduleTemps) / len(moduleTemps),  # C
 
-            'driveMotorSpeed':                 bytes_to_int_signed(raw_2101.value[55:57])  # RPM
-            })
+                             'driveMotorSpeed':                 bytes_to_int_signed(raw_2101.value[55:57])  # RPM
+                             })
 
         for i, temp in enumerate(moduleTemps):
             key = "dcBatteryModuleTemp{:02d}".format(i + 1)
@@ -448,19 +448,19 @@ def query_tpms_information():
     raw_tpms = query_command(cmd_tpms_22c00b)
     if 'raw_tpms' in locals() and raw_tpms is not None and raw_tpms.value is not None:
         tpms_info.update({
-            'timestamp': int(round(time.time())),
-            'tire_fl_pressure':    round((raw_tpms.value[7] * 0.2) / 14.504, 1),  # bar - Front Left
-            'tire_fl_temperature': raw_tpms.value[8] - 55,  # C   - Front Left
+                          'timestamp': int(round(time.time())),
+                          'tire_fl_pressure':    round((raw_tpms.value[7] * 0.2) / 14.504, 1),  # bar - Front Left
+                          'tire_fl_temperature': raw_tpms.value[8] - 55,  # C   - Front Left
 
-            'tire_fr_pressure':    round((raw_tpms.value[11] * 0.2) / 14.504, 1),  # bar - Front Right
-            'tire_fr_temperature': raw_tpms.value[12] - 55,  # C   - Front Right
+                          'tire_fr_pressure':    round((raw_tpms.value[11] * 0.2) / 14.504, 1),  # bar - Front Right
+                          'tire_fr_temperature': raw_tpms.value[12] - 55,  # C   - Front Right
 
-            'tire_bl_pressure':    round((raw_tpms.value[19] * 0.2) / 14.504, 1),  # bar - Back Left
-            'tire_bl_temperature': raw_tpms.value[20] - 55,  # C   - Back Left
+                          'tire_bl_pressure':    round((raw_tpms.value[19] * 0.2) / 14.504, 1),  # bar - Back Left
+                          'tire_bl_temperature': raw_tpms.value[20] - 55,  # C   - Back Left
 
-            'tire_br_pressure':    round((raw_tpms.value[15] * 0.2) / 14.504, 1),  # bar - Back Right
-            'tire_br_temperature': raw_tpms.value[16] - 55,  # C   - Back Right
-            })
+                          'tire_br_pressure':    round((raw_tpms.value[15] * 0.2) / 14.504, 1),  # bar - Back Right
+                          'tire_br_temperature': raw_tpms.value[16] - 55,  # C   - Back Right
+                          })
         logger.info("**** Got TPMS information ****")
     else:
         raise ValueError("Could not get TPMS information")
