@@ -6,4 +6,4 @@ install:
   - pip install pycodestyle
 # command to run tests
 script:
-  - pycodestyle --show-source --ignore=E501,E241 .
+  - pycodestyle --show-source --show-pep8 --ignore=E501,E241 .
