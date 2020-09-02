@@ -20,7 +20,7 @@ gpsd = None  # setting the global variable
 def on_publish(client, userdata, mid):
     """MQTT function for on_publish callback."""
     logger.debug("Publish message id: {}".format(mid))
-    #pass
+    #  pass
 
 
 def on_connect(client, userdata, flags, rc):
