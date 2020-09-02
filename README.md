@@ -674,7 +674,7 @@ Sample:
    "tire_bl_pressure":2.6,
    "tire_bl_temperature":33,
    "tire_br_pressure":2.5,
-   "tire_br_temperature":33,
+   "tire_br_temperature":33
 }
 ```
 
@@ -735,7 +735,7 @@ Sample:
    "mode":3,
    "latitude":19.644422362,
    "climb":-0.021,
-   "plongitude":23.24253151,
+   "plongitude":23.24253151
 }
 ```
 ## [BONUS] Monitor when charging
