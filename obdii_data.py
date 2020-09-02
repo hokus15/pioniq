@@ -490,7 +490,7 @@ def query_external_temperature():
 
 
 def publish_data_mqtt(msgs):
-    """Publish all messages to MQTT"""
+    """Publish all messages to MQTT."""
     try:
         logger.info("Publish messages to MQTT")
         for msg in msgs:
