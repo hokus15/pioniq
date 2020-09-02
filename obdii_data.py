@@ -15,7 +15,7 @@ from obd.decoders import raw_string
 from obd.utils import bytes_to_int
 
 
-class ConnectionError(Exception):
+class OBDIIConnectionError(Exception):
     pass
 
 
@@ -24,7 +24,7 @@ class CanError(Exception):
 
 
 def bytes_to_int_signed(b):
-    """Convert big-endian signed integer bytearray to int"""
+    """Convert big-endian signed integer bytearray to int."""
     return int.from_bytes(b, 'big', signed=True)
 # python 2.7 version below
 #    if not b:  # special-case 0 to avoid b[0] raising
@@ -43,6 +43,7 @@ def bytes_to_int_signed(b):
 def can_response(can_message):
     """
     CAN response decoder.
+
     This function returns a bytearray containing ONLY the data.
     CAN response data format:
 
@@ -155,15 +156,15 @@ def can_response(can_message):
 
 
 def log_can_response(can_message):
-    """The same as can_response decoder but logging data in binary, decimal and hex for debugging purposes"""
+    """The same as can_response decoder but logging data in binary, decimal and hex for debugging purposes."""
     raw = can_response(can_message)
-    for i in range(0, len(raw)):
-        logger.debug("Data[{}]:{} - {} - {}".format(i, '{0:08b}'.format(raw[i]), raw[i], hex(raw[i])))
+    for i, item in enumerate(raw):
+        logger.debug("Data[{}]:{} - {} - {}".format(i, '{0:08b}'.format(item), item, hex(item)))
     return raw
 
 
 def extract_vin(raw_can_response):
-    """Extract VIN from raw can response"""
+    """Extract VIN from raw can response."""
     vin_str = ""
     for v in range(16, 33):
         vin_str = vin_str + chr(bytes_to_int(raw_can_response.value[v:v + 1]))
@@ -171,7 +172,7 @@ def extract_vin(raw_can_response):
 
 
 def extract_gear(raw_can_response):
-    """Extract gear stick position from raw can response"""
+    """Extract gear stick position from raw can response."""
     gear_str = ""
     gear_bits = raw_can_response.value[7]
     if gear_bits & 0x1:  # 1st bit is 1
@@ -201,7 +202,7 @@ def obd_connect():
             time.sleep(connection_count)
 
     if obd_connection.status() != OBDStatus.CAR_CONNECTED:
-        raise ConnectionError(obd_connection.status())
+        raise OBDIIConnectionError(obd_connection.status())
     else:
         return obd_connection
 
@@ -803,7 +804,7 @@ if __name__ == '__main__':
                            .format(err),
                            exc_info=False)
 
-    except ConnectionError as err:
+    except OBDIIConnectionError as err:
         logger.error("OBDII connection error: {0}".format(err),
                      exc_info=False)
     except ValueError as err:

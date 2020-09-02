@@ -1,6 +1,4 @@
-# pioniq ![Build Status](https://img.shields.io/travis/hokus15/pioniq?logo=travis) ![License](https://img.shields.io/github/license/hokus15/pioniq) ![GitHub last commit](https://img.shields.io/github/last-commit/hokus15/pioniq?logo=github) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/hokus15/pioniq?logo=github)
-
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/aac60679819b4f56829ff5481437bf30)](https://app.codacy.com/manual/hokus15/pioniq?utm_source=github.com&utm_medium=referral&utm_content=hokus15/pioniq&utm_campaign=Badge_Grade_Dashboard)
+# pioniq ![Build Status](https://img.shields.io/travis/hokus15/pioniq?logo=travis) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/aac60679819b4f56829ff5481437bf30)](https://app.codacy.com/manual/hokus15/pioniq?utm_source=github.com&utm_medium=referral&utm_content=hokus15/pioniq&utm_campaign=Badge_Grade_Dashboard) ![License](https://img.shields.io/github/license/hokus15/pioniq) ![GitHub last commit](https://img.shields.io/github/last-commit/hokus15/pioniq?logo=github) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/hokus15/pioniq?logo=github)
 
 Extract OBDII data for Hyundai Ioniq EV - 28kWh, as well as the GPS location (using an external USB device) and publishes it to MQTT broker using a Raspberry Pi Zero W.
 
@@ -15,22 +13,22 @@ Here you have an screenshot of one of the tabs that I've configured for the car:
 
 You can check my [Home Assistant Configuration](https://github.com/hokus15/home-assistant-config) to get more details.
 
-
 ## Needed Hardware
-- [Raspberry Pi Zero W](https://www.amazon.es/Raspberry-Pi-Zero-wh/dp/B07BHMRTTY/ref=sr_1_5?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Raspberry+Pi+Zero+W&qid=1593189037&s=electronics&sr=1-5)
-- [LTE Stick Huawei E3372](https://www.amazon.es/Huawei-USB-Stick-E3372-Inal%C3%A1mbrica/dp/B013UURTL4/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=LTE+Stick+Huawei+E3372&qid=1593188977&s=electronics&sr=1-2)
-- [ELM327 Bluetooth scanner](https://www.amazon.es/Bluetooth-Scanner-Diagn%C3%B3stico-Wireless-Mercedes/dp/B079HS1LWB/ref=sr_1_15?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ELM327&qid=1593189429&s=electronics&sr=1-15)
-- [USB car charger](https://www.amazon.es/gp/product/B01HYZ8QPO/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1)
-- [USB GPS receiver GlobalSat BU-353-S4](https://www.amazon.es/GlobalSat-BU-353-S4-Receptor-SiRF-Star/dp/B008200LHW/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2ENXQ7W8O8JQE)
-- [USB cable extender](https://www.amazon.es/Cable-SODIAL-enchufe-extnsion-conector/dp/B01EIYCERU/ref=sr_1_25?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=alargador+USB&qid=1593189217&s=electronics&sr=1-25)
-- [USB to Micro USB adapter](https://www.amazon.es/gp/product/B003YKX6WM/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&psc=1)
-- [USB OTG cable](https://www.amazon.es/UGREEN-10396P-Hembra-Tel%C3%A9fono-Paquete/dp/B00N9S9Z0G/ref=sr_1_3?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=usb+female+to+micro+usb&qid=1593628139&s=computers&sr=1-3)
-- [Raspberry Pi Zero case](https://www.amazon.es/Gaoominy-Caja-para-Raspberry-Zero/dp/B07QV5RXCN/ref=sr_1_10?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2PS8DPO5AEH1F&dchild=1&keywords=caja+raspberry+pi+zero&qid=1593189549&s=electronics&sprefix=caja+rasp%2Celectronics%2C181&sr=1-10)
-- [Velcro stickers](https://www.amazon.es/gp/product/B00P94TB52/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
+-   [Raspberry Pi Zero W](https://www.amazon.es/Raspberry-Pi-Zero-wh/dp/B07BHMRTTY/ref=sr_1_5?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=Raspberry+Pi+Zero+W&qid=1593189037&s=electronics&sr=1-5)
+-   [LTE Stick Huawei E3372](https://www.amazon.es/Huawei-USB-Stick-E3372-Inal%C3%A1mbrica/dp/B013UURTL4/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=LTE+Stick+Huawei+E3372&qid=1593188977&s=electronics&sr=1-2)
+-   [ELM327 Bluetooth scanner](https://www.amazon.es/Bluetooth-Scanner-Diagn%C3%B3stico-Wireless-Mercedes/dp/B079HS1LWB/ref=sr_1_15?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=ELM327&qid=1593189429&s=electronics&sr=1-15)
+-   [USB car charger](https://www.amazon.es/gp/product/B01HYZ8QPO/ref=ppx_yo_dt_b_search_asin_title?ie=UTF8&psc=1)
+-   [USB GPS receiver GlobalSat BU-353-S4](https://www.amazon.es/GlobalSat-BU-353-S4-Receptor-SiRF-Star/dp/B008200LHW/ref=sr_1_2?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2ENXQ7W8O8JQE)
+-   [USB cable extender](https://www.amazon.es/Cable-SODIAL-enchufe-extnsion-conector/dp/B01EIYCERU/ref=sr_1_25?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=alargador+USB&qid=1593189217&s=electronics&sr=1-25)
+-   [USB to Micro USB adapter](https://www.amazon.es/gp/product/B003YKX6WM/ref=ppx_yo_dt_b_asin_title_o02_s00?ie=UTF8&psc=1)
+-   [USB OTG cable](https://www.amazon.es/UGREEN-10396P-Hembra-Tel%C3%A9fono-Paquete/dp/B00N9S9Z0G/ref=sr_1_3?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&dchild=1&keywords=usb+female+to+micro+usb&qid=1593628139&s=computers&sr=1-3)
+-   [Raspberry Pi Zero case](https://www.amazon.es/Gaoominy-Caja-para-Raspberry-Zero/dp/B07QV5RXCN/ref=sr_1_10?__mk_es_ES=%C3%85M%C3%85%C5%BD%C3%95%C3%91&crid=2PS8DPO5AEH1F&dchild=1&keywords=caja+raspberry+pi+zero&qid=1593189549&s=electronics&sprefix=caja+rasp%2Celectronics%2C181&sr=1-10)
+-   [Velcro stickers](https://www.amazon.es/gp/product/B00P94TB52/ref=ppx_yo_dt_b_asin_title_o05_s00?ie=UTF8&psc=1)
 
 See the [Amazon wishlist](https://www.amazon.es/hz/wishlist/ls/WO5Z2VX24HGJ?ref_=wl_share).
 
 ## Setup of Raspberry Pi Zero W
+
 ### Install the OS
 If you are new to Raspberry Pi, you should get some information about it [here](https://www.raspberrypi.org/).
 
@@ -41,9 +39,9 @@ The scripts and the following procedure has been designed and tested to use the 
 Use [Raspberry Pi Imager](https://www.raspberrypi.org/downloads/) for an easy way to install Raspberry Pi OS (and other operating systems) to an SD card.
 
 Once you have Raspberry Pi Imager installed open it and:
-* Under `Choose OS` option select `Raspberry Pi OS (other)` and then choose `Raspberry Pi OS Lite (32-bit)`
-* Choose your SD card
-* and Write it
+-   Under `Choose OS` option select `Raspberry Pi OS (other)` and then choose `Raspberry Pi OS Lite (32-bit)`
+-   Choose your SD card
+-   and Write it
 
 ### WLAN and SSH configuration
 Before you can put the SD card into the Pi and boot it, you should enable SSH connections and configure the WLAN.
@@ -757,14 +755,14 @@ Just create a free account in [Loggly](https://www.loggly.com/) and follow instr
 
 ## Credits
 All this work has been possible by putting together different pieces like:
-- How To Article from [sochack.eu](https://tutorial.sochack.eu/en/how-to-soc/)
-- [Ingesting GPS Data From Raspberry PI Zero Wireless With a USB GPS Device](https://dzone.com/articles/iot-ingesting-gps-data-from-raspberry-pi-zero-wire)
-- [python-OBD](https://github.com/brendan-w/python-OBD/tree/master/obd)
-- [EVNotiPi](https://github.com/EVNotify/EVNotiPi)
-- [OBD-PIDs-for-HKMC-EVs](https://github.com/JejuSoul/OBD-PIDs-for-HKMC-EVs)
-- [SoulEVSpy](https://github.com/langemand/SoulEVSpy)
-- [Open Vehicles](https://github.com/openvehicles/)
-- and of course lot of patience and [Google](https://www.google.com/)
+-   How To Article from [sochack.eu](https://tutorial.sochack.eu/en/how-to-soc/)
+-   [Ingesting GPS Data From Raspberry PI Zero Wireless With a USB GPS Device](https://dzone.com/articles/iot-ingesting-gps-data-from-raspberry-pi-zero-wire)
+-   [python-OBD](https://github.com/brendan-w/python-OBD/tree/master/obd)
+-   [EVNotiPi](https://github.com/EVNotify/EVNotiPi)
+-   [OBD-PIDs-for-HKMC-EVs](https://github.com/JejuSoul/OBD-PIDs-for-HKMC-EVs)
+-   [SoulEVSpy](https://github.com/langemand/SoulEVSpy)
+-   [Open Vehicles](https://github.com/openvehicles/)
+-   and of course lot of patience and [Google](https://www.google.com/)
 
 ## Informal disclaimer
 Before you download and use this software consider this: Any car is a possibly lethal piece of machinery and you might hurt or kill yourself or others using it, or even paying attention to the displays instead of watching the road. Be extremely prudent!
