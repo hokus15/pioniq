@@ -42,7 +42,9 @@ def bytes_to_int_signed(b):
 
 def can_response(can_message):
     """
+
     CAN response decoder.
+
 
     This function returns a bytearray containing ONLY the data.
     CAN response data format:
@@ -95,12 +97,12 @@ def can_response(can_message):
 
     First frame:
     Identifier Frame type Data length (03D = 61 bytes) Data
-    |         |          |                            |
+    |          |          |                            |
     7EC        1          03D                          6101FFFFFFFF -> 6 bytes of data
 
     Consecutive frames:
     Identifier Frame type Line index Data
-    |         |          |          |
+    |          |          |          |
     7EC        2          1          A9264826480300 -> +7 bytes of data (total 13 bytes)
     7EC        2          2          050EFA1F1F1F1F -> +7 bytes of data (total 20 bytes)
     7EC        2          3          1F1F1F001DC714 -> +7 bytes of data (total 27 bytes)
