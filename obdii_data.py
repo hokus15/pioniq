@@ -26,157 +26,46 @@ class CanError(Exception):
 def bytes_to_int_signed(b):
     """Convert big-endian signed integer bytearray to int."""
     return int.from_bytes(b, 'big', signed=True)
-# python 2.7 version below
-#    if not b:  # special-case 0 to avoid b[0] raising
-#        return 0
-#    n = b[0] & 0x7f  # skip sign bit
-#    for by in b[1:]:
-#        n = n * 256 + by
-#    if b[0] & 0x80:  # if sign bit is set, 2's complement
-#        bits = 8 * len(b)
-#        offset = 2 ** (bits - 1)
-#        return n - offset
-#    else:
-#        return n
+def external_temperature(messages):
+    """External temperature decoder."""
+    d = messages[0].data
+    return dict(external_temperature = (d[14] - 80) / 2.0)  # C
 
-
-def can_response(can_message):
-    """
-
-    CAN response decoder.
-
-
-    This function returns a bytearray containing ONLY the data.
-    CAN response data format:
-
-    Single frame
-    [0-3] Identifier
-    [3-4] Frame type
-        Frame type: 0 = single frame
-    [4-5] Data length
-    [5-19] Data. Keep in mind that data length may be shorter than the
-                length of the array, so you should read up to data length
-
-    First frame (multiple frames)
-    [0-3] Identifier
-    [3-4] Frame type
-        Frame type: 1 = First frame (multiple frames)
-    [4-7] Data length
-    [7-19] Data
-
-    Consecutive frame
-    [0-3] Identifier
-    [3-4] Frame type
-        Frame type: 2 = Consecutive frame
-    [4-19] Data. Keep in mind that for last frame data length may be
-                shorter than the length of the array, so you should read
-                up to data length.
-
-    For example:
-    Having the following CAN response frames:
-    7EC103D6101FFFFFFFF
-    7EC21A9264826480300
-    7EC22050EFA1F1F1F1F
-    7EC231F1F1F001DC714
-    7EC24C70A012A910001
-    7EC25547A000151B300
-    7EC26007AD100007718
-    7EC27005928B40D017F
-    7EC280000000003E800
-
-    It will be decomposed as:
-    7EC 1 03D 6101FFFFFFFF
-    7EC 2 1 A9264826480300
-    7EC 2 2 050EFA1F1F1F1F
-    7EC 2 3 1F1F1F001DC714
-    7EC 2 4 C70A012A910001
-    7EC 2 5 547A000151B300
-    7EC 2 6 007AD100007718
-    7EC 2 7 005928B40D017F
-    7EC 2 8 0000000003E8 00
-
-    First frame:
-    Identifier Frame type Data length (03D = 61 bytes) Data
-    |          |          |                            |
-    7EC        1          03D                          6101FFFFFFFF -> 6 bytes of data
-
-    Consecutive frames:
-    Identifier Frame type Line index Data
-    |          |          |          |
-    7EC        2          1          A9264826480300 -> +7 bytes of data (total 13 bytes)
-    7EC        2          2          050EFA1F1F1F1F -> +7 bytes of data (total 20 bytes)
-    7EC        2          3          1F1F1F001DC714 -> +7 bytes of data (total 27 bytes)
-    7EC        2          4          C70A012A910001 -> +7 bytes of data (total 34 bytes)
-    7EC        2          5          547A000151B300 -> +7 bytes of data (total 41 bytes)
-    7EC        2          6          007AD100007718 -> +7 bytes of data (total 48 bytes)
-    7EC        2          7          005928B40D017F -> +7 bytes of data (total 55 bytes)
-    7EC        2          8          0000000003E8  00 -> + 6 bytes of data (total 61 bytes)
-                                                    |
-                                                    Not part of the data (as it's bigger than 03D = 61 bytes of data)
-    """
-    data = None
-    data_len = 0
-    last_idx = 0
-    raw = can_message[0].raw().split('\n')
-    for line in raw:
-        if len(line) != 19:
-            raise ValueError("Error parsing CAN response: {}. Invalid line length {}!=19. "
-                             .format(line, len(line)))
-
-        offset = 3
-        # identifier = int(line[0:offset], 16)
-
-        frame_type = int(line[offset:offset + 1], 16)
-
-        if frame_type == 0:     # Single frame
-            data_len = int(line[offset + 1:offset + 2], 16)
-            data = bytes.fromhex(line[offset + 2:data_len * 2 + offset + 2])
-            break
-
-        elif frame_type == 1:   # First frame
-            data_len = int(line[offset + 1:offset + 4], 16)
-            data = bytearray.fromhex(line[offset + 4:])
-            last_idx = 0
-
-        elif frame_type == 2:   # Consecutive frame
-            idx = int(line[offset + 1:offset + 2], 16)
-            if (last_idx + 1) % 0x10 != idx:
-                raise CanError("Bad frame order: last_idx({}) idx({})"
-                               .format(last_idx, idx))
-
-            frame_len = min(7, data_len - len(data))
-            data.extend(bytearray.fromhex(line[offset + 2:frame_len * 2 + offset + 2]))
-            last_idx = idx
-
-            if data_len == len(data):
-                break
-
-        else:                   # Unexpected frame
-            raise ValueError('Unexpected frame')
-    # logger.debug("Expected data length: {}".format(data_len))
-    return data
-
-
-def log_can_response(can_message):
-    """The same as can_response decoder but logging data in binary, decimal and hex for debugging purposes."""
-    raw = can_response(can_message)
-    for i, item in enumerate(raw):
-        logger.debug("Data[{}]:{} - {} - {}".format(i, '{0:08b}'.format(item), item, hex(item)))
-    return raw
-
-
-def extract_vin(raw_can_response):
-    """Extract VIN from raw can response."""
+def vin(messages):
+    """VIN decoder."""
+    d = messages[0].data
     vin_str = ""
     for v in range(16, 33):
-        vin_str = vin_str + chr(bytes_to_int(raw_can_response.value[v:v + 1]))
-    return vin_str
+        vin_str = vin_str + chr(bytes_to_int(d[v:v + 1]))
+    return dict(vin = vin_str)
 
+def odometer(messages):
+    """Odometer decoder."""
+    d = messages[0].data
+    return dict(odometer = bytes_to_int(d[9:12]))  # Km
 
-def extract_gear(raw_can_response):
-    """Extract gear stick position from raw can response."""
+def tpms(messages):
+    """TPMS decoder."""
+    d = messages[0].data
+    return dict(tire_fl_pressure = round((d[7] * 0.2) / 14.504, 1),  # bar - Front Left
+                tire_fl_temperature = d[8] - 55,  # C   - Front Left
+                
+                tire_fr_pressure = round((d[11] * 0.2) / 14.504, 1),  # bar - Front Right
+                tire_fr_temperature = d[12] - 55,  # C   - Front Right
+                
+                tire_bl_pressure = round((d[19] * 0.2) / 14.504, 1),  # bar - Back Left
+                tire_bl_temperature = d[20] - 55,  # C   - Back Left
+
+                tire_br_pressure = round((d[15] * 0.2) / 14.504, 1),  # bar - Back Right
+                tire_br_temperature = d[16] - 55  # C   - Back Right
+                )
+
+def vmcu(messages):
+    """VMCU decoder."""
+    d = messages[0].data
+
     gear_str = ""
-    gear_bits = raw_can_response.value[7]
+    gear_bits = d[7]
     if gear_bits & 0x1:  # 1st bit is 1
         gear_str = gear_str + "P"
     if gear_bits & 0x2:  # 2nd bit is 1
@@ -186,8 +75,95 @@ def extract_gear(raw_can_response):
     if gear_bits & 0x8:  # 4th bit is 1
         gear_str = gear_str + "D"
 
-    return gear_str
+    brakes_bits = d[8]
 
+    return  dict(gear = gear_str,
+                 speed = (((d[16] * 256) + d[15]) / 100.0) * 1.60934,  # kmh. Multiplied by 1.60934 to convert mph to kmh
+                 accel_pedal_depth = d[16] / 2,  # %
+                 brake_lamp = 1 if brakes_bits & 0x1 else 0,  # 1st bit is 1
+                 brakes_on = 0 if brakes_bits & 0x2 else 1  # 2nd bit is 0
+                )
+
+def bms_2101(messages):
+    """BMS 2101 decoder."""
+    d = messages[0].data
+
+    charging_bits = d[11]
+    charging = 1 if charging_bits & 0x80 else 0  # 8th bit is 1
+
+    battery_current = bytes_to_int_signed(d[12:14]) / 10.0
+    battery_voltage = bytes_to_int(d[14:16]) / 10.0
+
+    return dict(socBms = d[6] / 2.0,  # %
+                bmsIgnition = 1 if d[52] & 0x4 else 0,  # 3rd bit is 1
+                bmsMainRelay = 1 if charging_bits & 0x1 else 0,  # 1st bit is 1
+                auxBatteryVoltage = d[31] / 10.0,  # V
+
+                charging = charging,
+                normalChargePort = 1 if charging_bits & 0x20 else 0,  # 6th bit is 1
+                rapidChargePort = 1 if charging_bits & 0x40 else 0,  # 7th bit is 1
+                fanStatus = d[29],  # Hz
+                fanFeedback = d[30],
+                cumulativeEnergyCharged = bytes_to_int(d[40:44]) / 10.0,  # kWh
+                cumulativeEnergyDischarged = bytes_to_int(d[44:48]) / 10.0,  # kWh
+
+                cumulativeChargeCurrent = bytes_to_int(d[32:36]) / 10.0,  # A
+                cumulativeDischargeCurrent = bytes_to_int(d[36:40]) / 10.0,  # A
+
+                cumulativeOperatingTime = bytes_to_int(d[48:52]),  # seconds
+
+                availableChargePower = bytes_to_int(d[7:9]) / 100.0,  # kW
+                availableDischargePower = bytes_to_int(d[9:11]) / 100.0,  # kW
+
+                dcBatteryInletTemperature = bytes_to_int_signed(d[22:23]),  # C
+                dcBatteryMaxTemperature = bytes_to_int_signed(d[16:17]),  # C
+                dcBatteryMinTemperature = bytes_to_int_signed(d[17:18]),  # C
+                dcBatteryCellMaxVoltage = d[25] / 50,  # V
+                dcBatteryCellNoMaxVoltage = d[26],
+                dcBatteryCellMinVoltage = d[27] / 50,  # V
+                dcBatteryCellNoMinVoltage = d[28],
+                dcBatteryCurrent = battery_current,  # A
+                dcBatteryPower = round(battery_current * battery_voltage / 1000.0, 3),  # kW
+                dcBatteryVoltage = battery_voltage,  # V
+
+                driveMotorSpeed = bytes_to_int_signed(d[55:57]),  # RPM
+
+                dcBatteryModuleTemp01 = bytes_to_int_signed(d[18:19]),  # C
+                dcBatteryModuleTemp02 = bytes_to_int_signed(d[19:20]),  # C
+                dcBatteryModuleTemp03 = bytes_to_int_signed(d[20:21]),  # C
+                dcBatteryModuleTemp04 = bytes_to_int_signed(d[21:22]),  # C
+                dcBatteryModuleTemp05 = bytes_to_int_signed(d[22:23]),  # C
+                )
+
+def bms_2105(messages):
+    """BMS 2105 decoder."""
+    d = messages[0].data
+
+    return dict(soh = bytes_to_int(d[27:29]) / 10.0,  # %
+                dcBatteryCellMaxDeterioration = bytes_to_int(d[27:29]) / 10.0,  # %
+                dcBatteryCellMinDeterioration = bytes_to_int(d[30:32]) / 10.0,  # %
+                socDisplay = int(d[33] / 2.0),  # %
+                dcBatteryModuleTemp06 = bytes_to_int_signed(d[11:12]),  # C
+                dcBatteryModuleTemp07 = bytes_to_int_signed(d[12:13]),  # C
+                dcBatteryModuleTemp08 = bytes_to_int_signed(d[13:14]),  # C
+                dcBatteryModuleTemp09 = bytes_to_int_signed(d[14:15]),  # C
+                dcBatteryModuleTemp10 = bytes_to_int_signed(d[15:16]),  # C
+                dcBatteryModuleTemp11 = bytes_to_int_signed(d[16:17]),  # C
+                dcBatteryModuleTemp12 = bytes_to_int_signed(d[17:18]),  # C
+                dcBatteryCellVoltageDeviation = d[22] / 50,  # V
+                dcBatteryHeater1Temperature = float(d[25]),  # C
+                dcBatteryHeater2Temperature = float(d[26]),  # C
+                dcBatteryCellNoMaxDeterioration = int(d[29]),
+                dcBatteryCellNoMinDeterioration = int(d[32]),
+                )
+
+def cell_voltages(messages):
+    """Cell voltages decoder."""
+    d = messages[0].data
+    cell_voltages = []
+    for byte in range(6, 38):
+        cell_voltages.append(d[byte] / 50.0)
+    return cell_voltages
 
 def obd_connect():
     connection_count = 0
@@ -233,133 +209,63 @@ def query_command(command):
         return cmd_response
 
 
-def query_battery_information():
+def query_battery_info():
     logger.info("**** Querying battery information ****")
-    battery_capacity = config['vehicle']['battery_capacity']
+    battery_info = {}
     # Set header to 7E4
-    query_command(cmd_can_header_7e4)
+    query_command(can_header_7e4)
     # Set the CAN receive address to 7EC
-    query_command(cmd_can_receive_address_7ec)
+    query_command(can_receive_address_7ec)
 
     # 2101 - 2105 codes to get battery status information
-    raw_2101 = query_command(cmd_bms_2101)
-    raw_2102 = query_command(cmd_bms_2102)
-    raw_2103 = query_command(cmd_bms_2103)
-    raw_2104 = query_command(cmd_bms_2104)
-    raw_2105 = query_command(cmd_bms_2105)
+    bms_2101_resp = query_command(bms_2101)
+    bms_2102_resp = query_command(bms_2102)
+    bms_2103_resp = query_command(bms_2103)
+    bms_2104_resp = query_command(bms_2104)
+    bms_2105_resp = query_command(bms_2105)
 
     # Extract status of health value from corresponding response
-    soh = bytes_to_int(raw_2105.value[27:29]) / 10.0
+    soh = bms_2105_resp.value["soh"]
 
-    battery_info = {}
     # Only create battery status data if got a consistent
     # Status Of Health (sometimes it's not consistent)
     if soh <= 100:
-        charging_bits = raw_2101.value[11]
-        charging = 1 if charging_bits & 0x80 else 0  # 8th bit is 1
+        charging = bms_2101_resp.value["charging"]
 
-        battery_current = bytes_to_int_signed(raw_2101.value[12:14]) / 10.0
-        battery_voltage = bytes_to_int(raw_2101.value[14:16]) / 10.0
+        battery_current = bms_2101_resp.value["dcBatteryCurrent"]
+        battery_voltage = bms_2101_resp.value["dcBatteryVoltage"]
 
-        battery_cell_max_deterioration = bytes_to_int(raw_2105.value[27:29]) / 10.0
-        battery_cell_min_deterioration = bytes_to_int(raw_2105.value[30:32]) / 10.0
-        soc_display = int(raw_2105.value[33] / 2.0)
-        soc_bms = raw_2101.value[6] / 2.0
+        battery_cell_max_deterioration = bms_2105_resp.value["dcBatteryCellMaxDeterioration"]
+        battery_cell_min_deterioration = bms_2105_resp.value["dcBatteryCellMinDeterioration"]
+        soc_display = bms_2105_resp.value["socDisplay"]
+        soc_bms = bms_2101_resp.value["socBms"]
 
         mins_to_complete = 0
 
-        # Calculate time to fully charge
+        # Calculate time to fully charge (only when charging)
         if charging == 1:
+            battery_capacity = config['vehicle']['battery_capacity']
             average_deterioration = (battery_cell_max_deterioration + battery_cell_min_deterioration) / 2.0
-            logger.debug("--------------------------------------------- average_deterioration: {}".format(average_deterioration))
             lost_soh = 100 - average_deterioration
-            logger.debug("--------------------------------------------- lost_soh: {}".format(lost_soh))
             lost_wh = ((battery_capacity * 1000) * lost_soh) / 100
-            logger.debug("--------------------------------------------- lost_wh: {}".format(lost_wh))
             remaining_pct = 100 - soc_display
-            logger.debug("--------------------------------------------- remaining_pct: {}".format(remaining_pct))
             remaining_wh = (((battery_capacity * 1000) - lost_wh) * remaining_pct) / 100
-            logger.debug("--------------------------------------------- remaining_wh: {}".format(remaining_wh))
             charge_power = abs((battery_current * battery_voltage))
-            logger.debug("--------------------------------------------- charge_power: {}".format(charge_power))
             mins_to_complete = int((remaining_wh / charge_power) * 60)
-            logger.debug("--------------------------------------------- mins_to_complete: {} hours {} mins".format(int(mins_to_complete / 60), mins_to_complete % 60))
 
-        module_temps = [
-            bytes_to_int_signed(raw_2101.value[18:19]),  # 0
-            bytes_to_int_signed(raw_2101.value[19:20]),  # 1
-            bytes_to_int_signed(raw_2101.value[20:21]),  # 2
-            bytes_to_int_signed(raw_2101.value[21:22]),  # 3
-            bytes_to_int_signed(raw_2101.value[22:23]),  # 4
-            bytes_to_int_signed(raw_2105.value[11:12]),  # 5
-            bytes_to_int_signed(raw_2105.value[12:13]),  # 6
-            bytes_to_int_signed(raw_2105.value[13:14]),  # 7
-            bytes_to_int_signed(raw_2105.value[14:15]),  # 8
-            bytes_to_int_signed(raw_2105.value[15:16]),  # 9
-            bytes_to_int_signed(raw_2105.value[16:17]),  # 10
-            bytes_to_int_signed(raw_2105.value[17:18])]  # 11
+        battery_info.update({'timestamp': int(round(bms_2105_resp.time))})
+        battery_info.update({'minsToCompleteCharge': mins_to_complete})
+        battery_info.update(bms_2101_resp.value)
+        battery_info.update(bms_2105_resp.value)
 
-        cell_voltages = []
-        for cmd in [raw_2102, raw_2103, raw_2104]:
-            for byte in range(6, 38):
-                cell_voltages.append(cmd.value[byte] / 50.0)
+        # Battery average temperature
+        module_temps = []
+        for i in range(1, 12):
+            module_temps.append(battery_info["dcBatteryModuleTemp{:02d}".format(i)])
+        battery_info.update({'dcBatteryAvgTemperature': round(sum(module_temps) / len(module_temps), 1)})
 
-        battery_info.update({
-                            'timestamp': int(round(time.time())),
-
-                            'socBms':                          soc_bms,  # %
-                            'socDisplay':                      soc_display,  # %
-                            'soh':                             soh,  # %
-
-                            'bmsIgnition':                     1 if raw_2101.value[52] & 0x4 else 0,  # 3rd bit is 1
-                            'bmsMainRelay':                    1 if charging_bits & 0x1 else 0,  # 1st bit is 1
-                            'auxBatteryVoltage':               raw_2101.value[31] / 10.0,  # V
-
-                            'charging':                        charging,
-                            'normalChargePort':                1 if charging_bits & 0x20 else 0,  # 6th bit is 1
-                            'rapidChargePort':                 1 if charging_bits & 0x40 else 0,  # 7th bit is 1
-                            'minsToCompleteCharge':            mins_to_complete,  # Mins
-
-                            'fanStatus':                       raw_2101.value[29],  # Hz
-                            'fanFeedback':                     raw_2101.value[30],
-
-                            'cumulativeEnergyCharged':         bytes_to_int(raw_2101.value[40:44]) / 10.0,  # kWh
-                            'cumulativeEnergyDischarged':      bytes_to_int(raw_2101.value[44:48]) / 10.0,  # kWh
-
-                            'cumulativeChargeCurrent':         bytes_to_int(raw_2101.value[32:36]) / 10.0,  # A
-                            'cumulativeDischargeCurrent':      bytes_to_int(raw_2101.value[36:40]) / 10.0,  # A
-
-                            'cumulativeOperatingTime':         bytes_to_int(raw_2101.value[48:52]),  # seconds
-
-                            'availableChargePower':            bytes_to_int(raw_2101.value[7:9]) / 100.0,  # kW
-                            'availableDischargePower':         bytes_to_int(raw_2101.value[9:11]) / 100.0,  # kW
-
-                            'dcBatteryCellVoltageDeviation':   raw_2105.value[22] / 50,  # V
-                            'dcBatteryHeater1Temperature':     float(raw_2105.value[25]),  # C
-                            'dcBatteryHeater2Temperature':     float(raw_2105.value[26]),  # C
-                            'dcBatteryInletTemperature':       bytes_to_int_signed(raw_2101.value[22:23]),  # C
-                            'dcBatteryMaxTemperature':         bytes_to_int_signed(raw_2101.value[16:17]),  # C
-                            'dcBatteryMinTemperature':         bytes_to_int_signed(raw_2101.value[17:18]),  # C
-                            'dcBatteryCellMaxVoltage':         raw_2101.value[25] / 50,  # V
-                            'dcBatteryCellNoMaxVoltage':       raw_2101.value[26],
-                            'dcBatteryCellMaxDeterioration':   battery_cell_max_deterioration,  # %
-                            'dcBatteryCellNoMaxDeterioration': int(raw_2105.value[29]),
-                            'dcBatteryCellMinVoltage':         raw_2101.value[27] / 50,  # V
-                            'dcBatteryCellNoMinVoltage':       raw_2101.value[28],
-                            'dcBatteryCellMinDeterioration':   battery_cell_min_deterioration,  # %
-                            'dcBatteryCellNoMinDeterioration': int(raw_2105.value[32]),
-                            'dcBatteryCurrent':                battery_current,  # A
-                            'dcBatteryPower':                  round(battery_current * battery_voltage / 1000.0, 3),  # kW
-                            'dcBatteryVoltage':                battery_voltage,  # V
-                            'dcBatteryAvgTemperature':         sum(module_temps) / len(module_temps),  # C
-
-                            'driveMotorSpeed':                 bytes_to_int_signed(raw_2101.value[55:57])  # RPM
-                            })
-
-        for i, temp in enumerate(module_temps):
-            key = "dcBatteryModuleTemp{:02d}".format(i + 1)
-            battery_info[key] = float(temp)
-
+        # Cell voltages
+        cell_voltages = bms_2102_resp.value + bms_2103_resp.value + bms_2104_resp.value
         for i, cvolt in enumerate(cell_voltages):
             key = "dcBatteryCellVoltage{:02d}".format(i + 1)
             battery_info[key] = float(cvolt)
@@ -368,128 +274,115 @@ def query_battery_information():
     else:
         raise ValueError("Got inconsistent data for battery Status Of Health: {}%"
                          .format(soh))
-    return battery_info
 
+    # Return exception when empty dict
+    if not bool(battery_info):
+        raise ValueError("Could not get battery information")
+    else:
+        return battery_info
 
-def query_odometer():
-    logger.info("**** Querying for odometer ****")
+def query_odometer_info():
+    logger.info("**** Querying odometer ****")
     odometer_info = {}
     # Set header to 7C6
-    query_command(cmd_can_header_7c6)
+    query_command(can_header_7c6)
     # Set the CAN receive address to 7EC
-    query_command(cmd_can_receive_address_7ec)
+    query_command(can_receive_address_7ec)
     # Sets the ID filter to 7CE
-    query_command(cmd_can_filter_7ce)
+    query_command(can_filter_7ce)
     # Query odometer
-    raw_odometer = query_command(cmd_odometer)
+    odometer_resp = query_command(odometer_22b002)
+
     # Only set odometer data if present.
     # Not available when car engine is off
-    if 'raw_odometer' in locals() and raw_odometer is not None and raw_odometer.value is not None:
-        odometer_info.update({
-            'timestamp': int(round(time.time())),
-            'odometer': bytes_to_int(raw_odometer.value[9:12])
-        })
-        logger.info("**** Got odometer value ****")
+    if not odometer_resp.is_null():
+        odometer_info.update({'timestamp': int(round(odometer_resp.time))})
+        odometer_info.update(odometer_resp.value)
     else:
-        raise ValueError("Could not get odometer value")
-    return odometer_info
+        logger.warning("Could not get odometer information")
+
+    # Return exception when empty dict
+    if not bool(odometer_info):
+        raise ValueError("Could not get odometer information")
+    else:
+        return odometer_info
 
 
-def query_vmcu_information():
-    logger.info("**** Querying for VMCU information ****")
-    vmcu_info = {
-        'timestamp': int(round(time.time()))
-    }
+def query_vmcu_info():
+    logger.info("**** Querying VMCU ****")
+    vmcu_info = {}
     # Set header to 7E2
-    query_command(cmd_can_header_7e2)
+    query_command(can_header_7e2)
     # Set the CAN receive address to 7EA
-    query_command(cmd_can_receive_address_7ea)
-
+    query_command(can_receive_address_7ea)
+    
     # VIN
-    try:
-        raw_vin = query_command(cmd_vin)
-        vin = extract_vin(raw_vin)
-        # Add vin to vmcu info
-        if 'vin' in locals() and vin is not None:
-            vmcu_info['vin'] = vin
-        else:
-            logger.warning("Could not get VIN")
-    except Exception as err:
-        logger.error("Could not get VIN: {}".format(err), exc_info=False)
+    vin_resp = query_command(vin_1a80)
+    # Add vin to vmcu info
+    if not vin_resp.is_null():
+        vmcu_info.update(vin_resp.value)
+    else:
+        logger.warning("Could not get VIN")
 
-    try:
-        raw_2101 = query_command(cmd_vmcu_2101)
-        gear = extract_gear(raw_2101)
-        brakes_bits = raw_2101.value[8]
-        # Add kmh to vmcu info
-        vmcu_info.update({
-            'speed':             (((raw_2101.value[16] * 256) + raw_2101.value[15]) / 100.0) * 1.60934,  # kmh. Multiplied by 1.60934 to convert mph to kmh
-            'accel_pedal_depth': raw_2101.value[16] / 2,  # %
-            'brake_lamp':        1 if brakes_bits & 0x1 else 0,  # 1st bit is 1
-            'brakes_on':         0 if brakes_bits & 0x2 else 1  # 2nd bit is 0
-        })
+    # VMCU
+    vmcu_2101_resp = query_command(vmcu_2101)
+    if not vmcu_2101_resp.is_null():
+        vmcu_info.update({'timestamp': int(round(vmcu_2101_resp.time))})
+        vmcu_info.update(vmcu_2101_resp.value)
+    else:
+        logger.warning("Could not get VMCU information")
 
-        # Add gear stick position to vmcu info
-        if 'gear' in locals() and gear is not None:
-            vmcu_info['gear'] = gear
-        else:
-            logger.warning("Could not get gear stick position")
-    except Exception as err:
-        logger.error("Could not get VMCU information: {}".format(err),
-                     exc_info=False)
-    return vmcu_info
+    # Return exception when empty dict
+    if not bool(vmcu_info):
+        raise ValueError("Could not get VMCU information")
+    else:
+        return vmcu_info
 
 
-def query_tpms_information():
+def query_tpms_info():
     logger.info("**** Querying for TPMS information ****")
     tpms_info = {}
     # Set the CAN receive address to 7A8
-    query_command(cmd_can_receive_address_7a8)
+    query_command(can_receive_address_7a8)
     # Set header to 7A0
-    query_command(cmd_can_header_7a0)
+    query_command(can_header_7a0)
     # Query TPMS
-    raw_tpms = query_command(cmd_tpms_22c00b)
-    if 'raw_tpms' in locals() and raw_tpms is not None and raw_tpms.value is not None:
-        tpms_info.update({
-                         'timestamp': int(round(time.time())),
-                         'tire_fl_pressure':    round((raw_tpms.value[7] * 0.2) / 14.504, 1),  # bar - Front Left
-                         'tire_fl_temperature': raw_tpms.value[8] - 55,  # C   - Front Left
+    tpms_22c00b_resp = query_command(tpms_22c00b)
 
-                         'tire_fr_pressure':    round((raw_tpms.value[11] * 0.2) / 14.504, 1),  # bar - Front Right
-                         'tire_fr_temperature': raw_tpms.value[12] - 55,  # C   - Front Right
-
-                         'tire_bl_pressure':    round((raw_tpms.value[19] * 0.2) / 14.504, 1),  # bar - Back Left
-                         'tire_bl_temperature': raw_tpms.value[20] - 55,  # C   - Back Left
-
-                         'tire_br_pressure':    round((raw_tpms.value[15] * 0.2) / 14.504, 1),  # bar - Back Right
-                         'tire_br_temperature': raw_tpms.value[16] - 55,  # C   - Back Right
-                         })
-        logger.info("**** Got TPMS information ****")
+    if not tpms_22c00b_resp.is_null():
+        tpms_info.update({'timestamp': int(round(tpms_22c00b_resp.time))})
+        tpms_info.update(tpms_22c00b_resp.value)
     else:
+        logger.warning("Could not get TPMS information")
+
+    # Return exception when empty dict
+    if not bool(tpms_info):
         raise ValueError("Could not get TPMS information")
-    return tpms_info
-
-
-def query_external_temperature():
-    logger.info("**** Querying for external temperature ****")
-    ext_temp_info = {
-        'timestamp': int(round(time.time()))
-    }
-
-    # Set header to 7E6
-    query_command(cmd_can_header_7e6)
-    # Set the CAN receive address to 7EC
-    query_command(cmd_can_receive_address_7ee)
-    # Query external temeprature
-    ext_temp = query_command(cmd_ext_temp)
-    # Only set temperature data if present.
-    if 'ext_temp' in locals() and ext_temp is not None and ext_temp.value is not None:
-        logger.info("**** Got external temperature value ****")
-        ext_temp_info['external_temperature'] = (ext_temp.value[14] - 80) / 2.0  # C
     else:
-        raise ValueError("Could not get external temperature value")
-    return ext_temp_info
+        return tpms_info
 
+def query_external_temperature_info():
+    logger.info("**** Querying for external temperature ****")
+    external_temperature_info = {}
+    # Set header to 7E6
+    query_command(can_header_7e6)
+    # Set the CAN receive address to 7EC
+    query_command(can_receive_address_7ee)
+    # Query external temeprature
+    ext_temp_resp = query_command(ext_temp_2180)
+
+    # Only set temperature data if present.
+    if not ext_temp_resp.is_null():
+        external_temperature_info.update({'timestamp': int(round(ext_temp_resp.time))})
+        external_temperature_info.update(ext_temp_resp.value)  # C
+    else:
+        logger.warning("Could not get external temperature information")
+
+    # Return exception when empty dict
+    if not bool(external_temperature_info):
+        raise ValueError("Could not get external temperature information")
+    else:
+        return external_temperature_info
 
 def publish_data_mqtt(msgs):
     """Publish all messages to MQTT."""
@@ -569,7 +462,7 @@ if __name__ == '__main__':
 
         connection = obd_connect()
 
-        cmd_can_header_7e4 = OBDCommand("ATSH7E4",
+        can_header_7e4 = OBDCommand("ATSH7E4",
                                         "Set CAN module ID to 7E4 - BMS battery information",
                                         b"ATSH7E4",
                                         0,
@@ -578,7 +471,7 @@ if __name__ == '__main__':
                                         False
                                         )
 
-        cmd_can_header_7c6 = OBDCommand("ATSH7C6",
+        can_header_7c6 = OBDCommand("ATSH7C6",
                                         "Set CAN module ID to 7C6 - Odometer information",
                                         b"ATSH7C6",
                                         0,
@@ -587,7 +480,7 @@ if __name__ == '__main__':
                                         False
                                         )
 
-        cmd_can_header_7e2 = OBDCommand("ATSH7E2",
+        can_header_7e2 = OBDCommand("ATSH7E2",
                                         "Set CAN module ID to 7E2 - VMCU information",
                                         b"ATSH7E2",
                                         0,
@@ -596,7 +489,7 @@ if __name__ == '__main__':
                                         False
                                         )
 
-        cmd_can_header_7a0 = OBDCommand("ATSH7A0",
+        can_header_7a0 = OBDCommand("ATSH7A0",
                                         "Set CAN module ID to 7A0 - TPMS information",
                                         b"ATSH7A0",
                                         0,
@@ -605,7 +498,7 @@ if __name__ == '__main__':
                                         False
                                         )
 
-        cmd_can_header_7e6 = OBDCommand("ATSH7E6",
+        can_header_7e6 = OBDCommand("ATSH7E6",
                                         "Set CAN module ID to 7E6 - External temp information",
                                         b"ATSH7E6",
                                         0,
@@ -614,7 +507,7 @@ if __name__ == '__main__':
                                         False
                                         )
 
-        cmd_can_receive_address_7ec = OBDCommand("ATCRA7EC",
+        can_receive_address_7ec = OBDCommand("ATCRA7EC",
                                                  "Set the CAN receive address to 7EC",
                                                  b"ATCRA7EC",
                                                  0,
@@ -623,7 +516,7 @@ if __name__ == '__main__':
                                                  False
                                                  )
 
-        cmd_can_receive_address_7ea = OBDCommand("ATCRA7EA",
+        can_receive_address_7ea = OBDCommand("ATCRA7EA",
                                                  "Set the CAN receive address to 7EA",
                                                  b"ATCRA7EA",
                                                  0,
@@ -632,7 +525,7 @@ if __name__ == '__main__':
                                                  False
                                                  )
 
-        cmd_can_receive_address_7a8 = OBDCommand("ATCRA7A8",
+        can_receive_address_7a8 = OBDCommand("ATCRA7A8",
                                                  "Set the CAN receive address to 7A8",
                                                  b"ATCRA7A8",
                                                  0,
@@ -641,7 +534,7 @@ if __name__ == '__main__':
                                                  False
                                                  )
 
-        cmd_can_receive_address_7ee = OBDCommand("ATCRA7EE",
+        can_receive_address_7ee = OBDCommand("ATCRA7EE",
                                                  "Set the CAN receive address to 7EE",
                                                  b"ATCRA7EE",
                                                  0,
@@ -650,7 +543,7 @@ if __name__ == '__main__':
                                                  False
                                                  )
 
-        cmd_can_filter_7ce = OBDCommand("ATCF7CE",
+        can_filter_7ce = OBDCommand("ATCF7CE",
                                         "Set the CAN filter to 7CE",
                                         b"ATCF7CE",
                                         0,
@@ -659,92 +552,92 @@ if __name__ == '__main__':
                                         False
                                         )
 
-        cmd_bms_2101 = OBDCommand("2101",
+        bms_2101 = OBDCommand("2101",
                                   "Extended command - BMS Battery information",
                                   b"2101",
                                   0,  # 61
-                                  can_response,
+                                  bms_2101,
                                   ECU.ALL,
                                   False
                                   )
 
-        cmd_bms_2102 = OBDCommand("2102",
+        bms_2102 = OBDCommand("2102",
                                   "Extended command - BMS Battery information",
                                   b"2102",
                                   0,  # 38
-                                  can_response,
+                                  cell_voltages,
                                   ECU.ALL,
                                   False
                                   )
 
-        cmd_bms_2103 = OBDCommand("2103",
+        bms_2103 = OBDCommand("2103",
                                   "Extended command - BMS Battery information",
                                   b"2103",
                                   0,  # 38
-                                  can_response,
+                                  cell_voltages,
                                   ECU.ALL,
                                   False
                                   )
 
-        cmd_bms_2104 = OBDCommand("2104",
+        bms_2104 = OBDCommand("2104",
                                   "Extended command - BMS Battery information",
                                   b"2104",
                                   0,  # 38
-                                  can_response,
+                                  cell_voltages,
                                   ECU.ALL,
                                   False
                                   )
 
-        cmd_bms_2105 = OBDCommand("2105",
+        bms_2105 = OBDCommand("2105",
                                   "Extended command - BMS Battery information",
                                   b"2105",
                                   0,  # 45
-                                  can_response,
+                                  bms_2105,
                                   ECU.ALL,
                                   False
                                   )
 
-        cmd_odometer = OBDCommand("22b002",
+        odometer_22b002 = OBDCommand("22b002",
                                   "Extended command - Odometer information",
                                   b"22b002",
                                   0,  # 15
-                                  can_response,
+                                  odometer,
                                   ECU.ALL,
                                   False
                                   )
 
-        cmd_vin = OBDCommand("1A80",
+        vin_1a80 = OBDCommand("1A80",
                              "Extended command - Vehicle Identification Number",
                              b"1A80",
                              0,  # 99
-                             can_response,
+                             vin,
                              ECU.ALL,
                              False
                              )
 
-        cmd_vmcu_2101 = OBDCommand("2101",
+        vmcu_2101 = OBDCommand("2101",
                                    "Extended command - VMCU information",
                                    b"2101",
                                    0,  # 22
-                                   can_response,
+                                   vmcu,
                                    ECU.ALL,
                                    False
                                    )
 
-        cmd_tpms_22c00b = OBDCommand("22C00B",
+        tpms_22c00b = OBDCommand("22C00B",
                                      "Extended command - TPMS information",
                                      b"22C00B",
                                      0,  # 23
-                                     can_response,
+                                     tpms,
                                      ECU.ALL,
                                      False
                                      )
 
-        cmd_ext_temp = OBDCommand("2180",
+        ext_temp_2180 = OBDCommand("2180",
                                   "Extended command - External temperature",
                                   b"2180",
                                   0,  # 25
-                                  can_response,
+                                  external_temperature,
                                   ECU.ALL,
                                   False
                                   )
@@ -757,7 +650,7 @@ if __name__ == '__main__':
         try:
             # Add battery information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "battery",
-                               'payload': json.dumps(query_battery_information()),
+                               'payload': json.dumps(query_battery_info()),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -767,7 +660,7 @@ if __name__ == '__main__':
         try:
             # Add VMCU information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "vmcu",
-                               'payload': json.dumps(query_vmcu_information()),
+                               'payload': json.dumps(query_vmcu_info()),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -777,7 +670,7 @@ if __name__ == '__main__':
         try:
             # Add Odometer to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "odometer",
-                               'payload': json.dumps(query_odometer()),
+                               'payload': json.dumps(query_odometer_info()),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -787,7 +680,7 @@ if __name__ == '__main__':
         try:
             # Add TPMS information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "tpms",
-                               'payload': json.dumps(query_tpms_information()),
+                               'payload': json.dumps(query_tpms_info()),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -798,11 +691,11 @@ if __name__ == '__main__':
         try:
             # Add external temperture information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "ext_temp",
-                               'payload': json.dumps(query_external_temperature()),
+                               'payload': json.dumps(query_external_temperature_info()),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
-            logger.warning("**** Error querying tpms information: {} ****"
+            logger.warning("**** Error querying external temperature information: {} ****"
                            .format(err),
                            exc_info=False)
 
@@ -817,7 +710,7 @@ if __name__ == '__main__':
                      exc_info=False)
     except Exception as ex:
         logger.error("Unexpected error: {}".format(ex),
-                     exc_info=False)
+                     exc_info=True)
     finally:
         publish_data_mqtt(mqtt_msgs)
         if 'connection' in locals() and connection is not None:
