@@ -325,7 +325,7 @@ def query_vmcu_info():
     query_command(can_header_7e2)
     # Set the CAN receive address to 7EA
     query_command(can_receive_address_7ea)
-    
+
     # VIN
     vin_resp = query_command(vin_1a80)
     # Add vin to vmcu info
