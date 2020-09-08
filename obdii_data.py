@@ -54,10 +54,10 @@ def tpms(messages):
     d = messages[0].data
     return dict(tire_fl_pressure=round((d[7] * 0.2) / 14.504, 1),  # bar - Front Left
                 tire_fl_temperature=d[8] - 55,  # C   - Front Left
- 
+
                 tire_fr_pressure=round((d[11] * 0.2) / 14.504, 1),  # bar - Front Right
                 tire_fr_temperature=d[12] - 55,  # C   - Front Right
- 
+
                 tire_bl_pressure=round((d[19] * 0.2) / 14.504, 1),  # bar - Back Left
                 tire_bl_temperature=d[20] - 55,  # C   - Back Left
 
