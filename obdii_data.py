@@ -46,11 +46,10 @@ def vin(messages):
 def odometer(messages):
     """Odometer decoder."""
     d = messages[0].data
-    v = bytes_to_int(d[9:12])
-    if not isinstance(v, int) or v == 0:
+    if len(d) == 0:
         return None
-    else: 
-        return dict(odometer=v)  # Km
+    else:
+        return dict(odometer=bytes_to_int(d[9:12]))  # Km
 
 
 def tpms(messages):
