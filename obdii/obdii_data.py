@@ -178,16 +178,16 @@ def cell_voltages(messages):
     return cell_voltages
 
 
-def obd_connect():
+def obd_connect(portstr, baudrate, fast=False, timeout=30):
     connection_count = 0
     obd_connection = None
     while (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < MAX_ATTEMPTS:
         connection_count += 1
         # Establish connection with OBDII dongle
-        obd_connection = obd.OBD(portstr=config['serial']['port'],
-                                 baudrate=int(config['serial']['baudrate']),
-                                 fast=False,
-                                 timeout=30)
+        obd_connection = obd.OBD(portstr=portstr,
+                                 baudrate=baudrate,
+                                 fast=fast,
+                                 timeout=timeout)
         if (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < MAX_ATTEMPTS:
             logger.warning("{}. Retrying in {} second(s)...".format(obd_connection.status(), connection_count))
             time.sleep(connection_count)
@@ -430,7 +430,7 @@ if __name__ == '__main__':
     console_handler.setLevel(logging.DEBUG)
     logger.addHandler(console_handler)
 
-    file_handler = logging.handlers.TimedRotatingFileHandler(os.path.dirname(os.path.realpath(__file__)) + '/obdii_data.log',
+    file_handler = logging.handlers.TimedRotatingFileHandler(os.path.dirname(os.path.realpath(__file__)) + '/../obdii_data.log',
                                                              when='midnight',
                                                              backupCount=15
                                                              )  # sends output to obdii_data.log file rotating it at midnight and storing latest 15 days
@@ -475,7 +475,10 @@ if __name__ == '__main__':
         obd.logger.addHandler(console_handler)
         obd.logger.addHandler(file_handler)
 
-        connection = obd_connect()
+        connection = obd_connect(portstr=config['serial']['port'],
+                                 baudrate=int(config['serial']['baudrate']),
+                                 fast=False,
+                                 timeout=30)
 
         can_header_7e4 = OBDCommand("ATSH7E4",
                                     "Set CAN module ID to 7E4 - BMS battery information",

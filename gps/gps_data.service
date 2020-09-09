@@ -5,10 +5,10 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-WorkingDirectory=/opt/pioniq
+WorkingDirectory=/opt/pioniq/gps
 User=pi
 Type=idle
-ExecStart=/usr/bin/python3 /opt/pioniq/gps_data.py
+ExecStart=/usr/bin/python3 /opt/pioniq/gps/gps_data.py
 # Redirect stderr to /dev/null to avoid logging twice to loggly (once from log file and another from stderr (StreamHandler))
 StandardError=null
 

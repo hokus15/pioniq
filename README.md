@@ -329,8 +329,8 @@ Make sure you are in `/opt/pioniq` folder.
 
 Copy config files from template.
 ```
-cp obdii_data.config.template.json obdii_data.config.json
-cp gps_data.config.template.json gps_data.config.json
+cp obdii/obdii_data.config.template.json obdii/obdii_data.config.json
+cp gps/gps_data.config.template.json gps/gps_data.config.json
 ```
 
 Adapt them to your needs.
@@ -344,7 +344,7 @@ To test that everything works, execute the first script:
 
 Run the command:
 ```
-python3 /opt/pioniq/obdii_data.py
+python3 /opt/pioniq/obdii/obdii_data.py
 ```
 
 This should publish obdii information to the configured MQTT server.
@@ -360,7 +360,7 @@ crontab -e
 
 And configure the following cron job:
 ```
-* * * * * python3 /opt/pioniq/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
+* * * * * python3 /opt/pioniq/obdii/obdii_data.py& PID=$!; sleep 55; kill $PID >/dev/null 2>&1
 ```
 
 ### Run automatically GPS data script
@@ -371,7 +371,7 @@ To run the `gps_data.py` script automatically we need to set it up as a service,
 
 Enable the service like this:
 ```
-sudo systemctl link /opt/pioniq/gps_data.service
+sudo systemctl link /opt/pioniq/gps/gps_data.service
 sudo systemctl enable gps_data.service
 sudo systemctl daemon-reload
 ```
@@ -619,7 +619,7 @@ Sample:
 ```
 
 ### vmcu
-Vehicle Motor Control System information is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']vmcu` i.e.: `car/sensor/ioniq/vmcu` as a json object with the following format:
+Vehicle Motor Control Unit information is published from `obdii_data.py` script in the `config['mqtt']['topic_prefix']vmcu` i.e.: `car/sensor/ioniq/vmcu` as a json object with the following format:
 
 ```
 {
