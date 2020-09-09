@@ -24,17 +24,17 @@ class CanError(Exception):
     pass
 
 
-def obd_connect(portstr, baudrate, fast=False, timeout=30):
+def obd_connect(portstr, baudrate, fast=False, timeout=30, max_attempts=3):
     connection_count = 0
     obd_connection = None
-    while (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < MAX_ATTEMPTS:
+    while (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < max_attempts:
         connection_count += 1
         # Establish connection with OBDII dongle
         obd_connection = obd.OBD(portstr=portstr,
                                  baudrate=baudrate,
                                  fast=fast,
                                  timeout=timeout)
-        if (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < MAX_ATTEMPTS:
+        if (obd_connection is None or obd_connection.status() != OBDStatus.CAR_CONNECTED) and connection_count < max_attempts:
             logger.warning("{}. Retrying in {} second(s)...".format(obd_connection.status(), connection_count))
             time.sleep(connection_count)
 
@@ -44,25 +44,25 @@ def obd_connect(portstr, baudrate, fast=False, timeout=30):
         return obd_connection
 
 
-def query_command(command):
+def query_command(command, max_attempts=3):
     command_count = 0
     cmd_response = None
     exception = False
     valid_response = False
-    while not valid_response and command_count < MAX_ATTEMPTS:
+    while not valid_response and command_count < max_attempts:
         command_count += 1
         try:
             cmd_response = connection.query(command, force=True)
         except Exception:
             exception = True
         valid_response = not(cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception)
-        if not valid_response and command_count < MAX_ATTEMPTS:
+        if not valid_response and command_count < max_attempts:
             logger.warning("No valid response for {}. Retrying in {} second(s)...".format(command, command_count))
             time.sleep(command_count)
 
     if not valid_response:
         raise ValueError("No valid response for {}. Max attempts ({}) exceeded."
-                         .format(command, MAX_ATTEMPTS))
+                         .format(command, max_attempts))
     else:
         logger.info("Got response from command: {} ".format(command))
         return cmd_response
@@ -296,8 +296,6 @@ if __name__ == '__main__':
     topic_prefix = config['mqtt']['topic_prefix']
 
     mqtt_msgs = []
-
-    MAX_ATTEMPTS = 3
 
     try:
         logger.info("=== Script start ===")
