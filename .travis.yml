@@ -3,7 +3,7 @@ python:
   - "3.7"
 # command to install dependencies
 install:
-  - pip install pycodestyle
+  - python -m pip install flake8
 # command to run tests
 script:
-  - pycodestyle --show-source --show-pep8 --ignore=E501,E241 .
+  - python -m flake8
