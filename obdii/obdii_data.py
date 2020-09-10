@@ -42,7 +42,7 @@ def obd_connect(portstr, baudrate, fast=False, timeout=30, max_attempts=3):
         return obd_connection
 
 
-def query_command(command, max_attempts=3):
+def query_command(connection, command, max_attempts=3):
     command_count = 0
     cmd_response = None
     exception = False
@@ -66,20 +66,20 @@ def query_command(command, max_attempts=3):
         return cmd_response
 
 
-def query_battery_info():
+def query_battery_info(connection, battery_capacity):
     logger.info("**** Querying battery information ****")
     battery_info = {}
     # Set header to 7E4
-    query_command(ext_commands["CAN_HEADER_7E4"])
+    query_command(connection, ext_commands["CAN_HEADER_7E4"])
     # Set the CAN receive address to 7EC
-    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EC"])
+    query_command(connection, ext_commands["CAN_RECEIVE_ADDRESS_7EC"])
 
     # 2101 - 2105 codes to get battery status information
-    bms_2101_resp = query_command(ext_commands["BMS_2101"])
-    bms_2102_resp = query_command(ext_commands["BMS_2102"])
-    bms_2103_resp = query_command(ext_commands["BMS_2103"])
-    bms_2104_resp = query_command(ext_commands["BMS_2104"])
-    bms_2105_resp = query_command(ext_commands["BMS_2105"])
+    bms_2101_resp = query_command(connection, ext_commands["BMS_2101"])
+    bms_2102_resp = query_command(connection, ext_commands["BMS_2102"])
+    bms_2103_resp = query_command(connection, ext_commands["BMS_2103"])
+    bms_2104_resp = query_command(connection, ext_commands["BMS_2104"])
+    bms_2105_resp = query_command(connection, ext_commands["BMS_2105"])
 
     # Extract status of health value from corresponding response
     soh = bms_2105_resp.value["soh"]
@@ -100,7 +100,6 @@ def query_battery_info():
 
         # Calculate time to fully charge (only when charging)
         if charging == 1:
-            battery_capacity = config['vehicle']['battery_capacity']
             average_deterioration = (battery_cell_max_deterioration + battery_cell_min_deterioration) / 2.0
             lost_soh = 100 - average_deterioration
             lost_wh = ((battery_capacity * 1000) * lost_soh) / 100
@@ -138,17 +137,17 @@ def query_battery_info():
         return battery_info
 
 
-def query_odometer_info():
+def query_odometer_info(connection):
     logger.info("**** Querying odometer ****")
     odometer_info = {}
     # Set header to 7C6
-    query_command(ext_commands["CAN_HEADER_7C6"])
+    query_command(connection, ext_commands["CAN_HEADER_7C6"])
     # Set the CAN receive address to 7EC
-    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EC"])
+    query_command(connection, ext_commands["CAN_RECEIVE_ADDRESS_7EC"])
     # Sets the ID filter to 7CE
-    query_command(ext_commands["CAN_FILTER_7CE"])
+    query_command(connection, ext_commands["CAN_FILTER_7CE"])
     # Query odometer
-    odometer_resp = query_command(ext_commands["ODOMETER_22B002"])
+    odometer_resp = query_command(connection, ext_commands["ODOMETER_22B002"])
 
     # Only set odometer data if present.
     # Not available when car engine is off
@@ -165,16 +164,16 @@ def query_odometer_info():
         return odometer_info
 
 
-def query_vmcu_info():
+def query_vmcu_info(connection):
     logger.info("**** Querying VMCU ****")
     vmcu_info = {}
     # Set header to 7E2
-    query_command(ext_commands["CAN_HEADER_7E2"])
+    query_command(connection, ext_commands["CAN_HEADER_7E2"])
     # Set the CAN receive address to 7EA
-    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EA"])
+    query_command(connection, ext_commands["CAN_RECEIVE_ADDRESS_7EA"])
 
     # VIN
-    vin_resp = query_command(ext_commands["VIN_1A80"])
+    vin_resp = query_command(connection, ext_commands["VIN_1A80"])
     # Add vin to vmcu info
     if not vin_resp.is_null():
         vmcu_info.update(vin_resp.value)
@@ -182,7 +181,7 @@ def query_vmcu_info():
         logger.warning("Could not get VIN")
 
     # VMCU
-    vmcu_2101_resp = query_command(ext_commands["VMCU_2101"])
+    vmcu_2101_resp = query_command(connection, ext_commands["VMCU_2101"])
     if not vmcu_2101_resp.is_null():
         vmcu_info.update({'timestamp': int(round(vmcu_2101_resp.time))})
         vmcu_info.update(vmcu_2101_resp.value)
@@ -196,15 +195,15 @@ def query_vmcu_info():
         return vmcu_info
 
 
-def query_tpms_info():
+def query_tpms_info(connection):
     logger.info("**** Querying for TPMS information ****")
     tpms_info = {}
     # Set header to 7A0
-    query_command(ext_commands["CAN_HEADER_7A0"])
+    query_command(connection, ext_commands["CAN_HEADER_7A0"])
     # Set the CAN receive address to 7A8
-    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7A8"])
+    query_command(connection, ext_commands["CAN_RECEIVE_ADDRESS_7A8"])
     # Query TPMS
-    tpms_22c00b_resp = query_command(ext_commands["TPMS_22C00B"])
+    tpms_22c00b_resp = query_command(connection, ext_commands["TPMS_22C00B"])
 
     if not tpms_22c00b_resp.is_null():
         tpms_info.update({'timestamp': int(round(tpms_22c00b_resp.time))})
@@ -219,15 +218,15 @@ def query_tpms_info():
         return tpms_info
 
 
-def query_external_temperature_info():
+def query_external_temperature_info(connection):
     logger.info("**** Querying for external temperature ****")
     external_temperature_info = {}
     # Set header to 7E6
-    query_command(ext_commands["CAN_HEADER_7E6"])
+    query_command(connection, ext_commands["CAN_HEADER_7E6"])
     # Set the CAN receive address to 7EC
-    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EE"])
+    query_command(connection, ext_commands["CAN_RECEIVE_ADDRESS_7EE"])
     # Query external temeprature
-    ext_temp_resp = query_command(ext_commands["EXT_TEMP_2180"])
+    ext_temp_resp = query_command(connection, ext_commands["EXT_TEMP_2180"])
 
     # Only set temperature data if present.
     if not ext_temp_resp.is_null():
@@ -243,7 +242,14 @@ def query_external_temperature_info():
         return external_temperature_info
 
 
-def publish_data_mqtt(msgs):
+def publish_data_mqtt(msgs,
+                      hostname,
+                      port,
+                      client_id,
+                      user,
+                      password,
+                      keepalive=60,
+                      will=None):
     """Publish all messages to MQTT."""
     try:
         logger.info("Publish messages to MQTT")
@@ -251,11 +257,11 @@ def publish_data_mqtt(msgs):
             logger.info("{}".format(msg))
 
         publish.multiple(msgs,
-                         hostname=broker_address,
+                         hostname=hostname,
                          port=port,
-                         client_id="battery-data-script",
-                         keepalive=60,
-                         will=None,
+                         client_id=client_id,
+                         keepalive=keepalive,
+                         will=will,
                          auth={'username': user, 'password': password},
                          tls={'tls_version': ssl.PROTOCOL_TLS},
                          protocol=mqtt.MQTTv311,
@@ -266,9 +272,7 @@ def publish_data_mqtt(msgs):
         logger.error("Error publishing to MQTT: {}".format(err), exc_info=False)
 
 
-if __name__ == '__main__':
-    logger = logging.getLogger('obdii')
-
+def main():
     console_handler = logging.StreamHandler()  # sends output to stderr
     console_handler.setFormatter(logging.Formatter("%(asctime)s %(name)-10s %(levelname)-8s %(message)s"))
     console_handler.setLevel(logging.DEBUG)
@@ -283,6 +287,14 @@ if __name__ == '__main__':
     logger.addHandler(file_handler)
 
     logger.setLevel(logging.DEBUG)
+
+    obd.logger.setLevel(obd.logging.DEBUG)
+    # Remove obd logger existing handlers
+    for handler in obd.logger.handlers[:]:
+        obd.logger.removeHandler(handler)
+    # Add handlers to obd logger
+    obd.logger.addHandler(console_handler)
+    obd.logger.addHandler(file_handler)
 
     with open(os.path.dirname(os.path.realpath(__file__)) + '/obdii_data.config.json') as config_file:
         config = json.loads(config_file.read())
@@ -309,14 +321,6 @@ if __name__ == '__main__':
                            'retain': True}]
                          )
 
-        obd.logger.setLevel(obd.logging.DEBUG)
-        # Remove obd logger existing handlers
-        for handler in obd.logger.handlers[:]:
-            obd.logger.removeHandler(handler)
-        # Add handlers to obd logger
-        obd.logger.addHandler(console_handler)
-        obd.logger.addHandler(file_handler)
-
         connection = obd_connect(portstr=config['serial']['port'],
                                  baudrate=int(config['serial']['baudrate']),
                                  fast=False,
@@ -330,7 +334,7 @@ if __name__ == '__main__':
         try:
             # Add battery information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "battery",
-                               'payload': json.dumps(query_battery_info()),
+                               'payload': json.dumps(query_battery_info(connection, config['vehicle']['battery_capacity'])),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -340,7 +344,7 @@ if __name__ == '__main__':
         try:
             # Add VMCU information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "vmcu",
-                               'payload': json.dumps(query_vmcu_info()),
+                               'payload': json.dumps(query_vmcu_info(connection)),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -350,7 +354,7 @@ if __name__ == '__main__':
         try:
             # Add Odometer to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "odometer",
-                               'payload': json.dumps(query_odometer_info()),
+                               'payload': json.dumps(query_odometer_info(connection)),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -360,7 +364,7 @@ if __name__ == '__main__':
         try:
             # Add TPMS information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "tpms",
-                               'payload': json.dumps(query_tpms_info()),
+                               'payload': json.dumps(query_tpms_info(connection)),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -371,7 +375,7 @@ if __name__ == '__main__':
         try:
             # Add external temperture information to MQTT messages array
             mqtt_msgs.extend([{'topic': topic_prefix + "ext_temp",
-                               'payload': json.dumps(query_external_temperature_info()),
+                               'payload': json.dumps(query_external_temperature_info(connection)),
                                'qos': 0,
                                'retain': True}])
         except (ValueError, CanError) as err:
@@ -392,7 +396,17 @@ if __name__ == '__main__':
         logger.error("Unexpected error: {}".format(ex),
                      exc_info=True)
     finally:
-        publish_data_mqtt(mqtt_msgs)
+        publish_data_mqtt(msgs=mqtt_msgs,
+                          hostname=broker_address,
+                          port=port,
+                          client_id="battery-data-script",
+                          user=user,
+                          password=password)
         if 'connection' in locals() and connection is not None:
             connection.close()
         logger.info("===  Script end  ===")
+
+
+if __name__ == '__main__':
+    logger = logging.getLogger('obdii')
+    main()
