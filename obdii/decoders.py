@@ -1,6 +1,7 @@
 from obd.utils import bytes_to_int
 from utils import bytes_to_int_signed
 
+
 def external_temperature(messages):
     """External temperature decoder."""
     d = messages[0].data

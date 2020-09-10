@@ -10,7 +10,8 @@ import paho.mqtt.publish as publish
 import paho.mqtt.client as mqtt
 import obd
 from obd import OBDStatus
-from commands import *
+
+from commands import ext_commands
 
 
 class OBDIIConnectionError(Exception):
@@ -69,16 +70,16 @@ def query_battery_info():
     logger.info("**** Querying battery information ****")
     battery_info = {}
     # Set header to 7E4
-    query_command(can_header_7e4)
+    query_command(ext_commands["CAN_HEADER_7E4"])
     # Set the CAN receive address to 7EC
-    query_command(can_receive_address_7ec)
+    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EC"])
 
     # 2101 - 2105 codes to get battery status information
-    bms_2101_resp = query_command(bms_2101)
-    bms_2102_resp = query_command(bms_2102)
-    bms_2103_resp = query_command(bms_2103)
-    bms_2104_resp = query_command(bms_2104)
-    bms_2105_resp = query_command(bms_2105)
+    bms_2101_resp = query_command(ext_commands["BMS_2101"])
+    bms_2102_resp = query_command(ext_commands["BMS_2102"])
+    bms_2103_resp = query_command(ext_commands["BMS_2103"])
+    bms_2104_resp = query_command(ext_commands["BMS_2104"])
+    bms_2105_resp = query_command(ext_commands["BMS_2105"])
 
     # Extract status of health value from corresponding response
     soh = bms_2105_resp.value["soh"]
@@ -141,13 +142,13 @@ def query_odometer_info():
     logger.info("**** Querying odometer ****")
     odometer_info = {}
     # Set header to 7C6
-    query_command(can_header_7c6)
+    query_command(ext_commands["CAN_HEADER_7C6"])
     # Set the CAN receive address to 7EC
-    query_command(can_receive_address_7ec)
+    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EC"])
     # Sets the ID filter to 7CE
-    query_command(can_filter_7ce)
+    query_command(ext_commands["CAN_FILTER_7CE"])
     # Query odometer
-    odometer_resp = query_command(odometer_22b002)
+    odometer_resp = query_command(ext_commands["ODOMETER_22B002"])
 
     # Only set odometer data if present.
     # Not available when car engine is off
@@ -168,12 +169,12 @@ def query_vmcu_info():
     logger.info("**** Querying VMCU ****")
     vmcu_info = {}
     # Set header to 7E2
-    query_command(can_header_7e2)
+    query_command(ext_commands["CAN_HEADER_7E2"])
     # Set the CAN receive address to 7EA
-    query_command(can_receive_address_7ea)
+    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EA"])
 
     # VIN
-    vin_resp = query_command(vin_1a80)
+    vin_resp = query_command(ext_commands["VIN_1A80"])
     # Add vin to vmcu info
     if not vin_resp.is_null():
         vmcu_info.update(vin_resp.value)
@@ -181,7 +182,7 @@ def query_vmcu_info():
         logger.warning("Could not get VIN")
 
     # VMCU
-    vmcu_2101_resp = query_command(vmcu_2101)
+    vmcu_2101_resp = query_command(ext_commands["VMCU_2101"])
     if not vmcu_2101_resp.is_null():
         vmcu_info.update({'timestamp': int(round(vmcu_2101_resp.time))})
         vmcu_info.update(vmcu_2101_resp.value)
@@ -198,12 +199,12 @@ def query_vmcu_info():
 def query_tpms_info():
     logger.info("**** Querying for TPMS information ****")
     tpms_info = {}
-    # Set the CAN receive address to 7A8
-    query_command(can_receive_address_7a8)
     # Set header to 7A0
-    query_command(can_header_7a0)
+    query_command(ext_commands["CAN_HEADER_7A0"])
+    # Set the CAN receive address to 7A8
+    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7A8"])
     # Query TPMS
-    tpms_22c00b_resp = query_command(tpms_22c00b)
+    tpms_22c00b_resp = query_command(ext_commands["TPMS_22C00B"])
 
     if not tpms_22c00b_resp.is_null():
         tpms_info.update({'timestamp': int(round(tpms_22c00b_resp.time))})
@@ -222,11 +223,11 @@ def query_external_temperature_info():
     logger.info("**** Querying for external temperature ****")
     external_temperature_info = {}
     # Set header to 7E6
-    query_command(can_header_7e6)
+    query_command(ext_commands["CAN_HEADER_7E6"])
     # Set the CAN receive address to 7EC
-    query_command(can_receive_address_7ee)
+    query_command(ext_commands["CAN_RECEIVE_ADDRESS_7EE"])
     # Query external temeprature
-    ext_temp_resp = query_command(ext_temp_2180)
+    ext_temp_resp = query_command(ext_commands["EXT_TEMP_2180"])
 
     # Only set temperature data if present.
     if not ext_temp_resp.is_null():
