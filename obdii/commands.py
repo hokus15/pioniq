@@ -21,15 +21,15 @@ ext_commands = {
 
     'CAN_FILTER_7CE':          OBDCommand("CAN_FILTER_7CE",          "Set the CAN filter to 7CE"                           , b"ATCF7CE" ,  0, raw_string          , ECU.UNKNOWN, False),
 
-    'BMS_2101':                OBDCommand("BMS_2101",                "Extended command - BMS Battery information"          , b"2101"    , 61, bms_2101            , ECU.ALL    , False),
-    'BMS_2102':                OBDCommand("BMS_2102",                "Extended command - BMS Battery information"          , b"2102"    , 38, cell_voltages       , ECU.ALL    , False),
-    'BMS_2103':                OBDCommand("BMS_2103",                "Extended command - BMS Battery information"          , b"2103"    , 38, cell_voltages       , ECU.ALL    , False),
-    'BMS_2104':                OBDCommand("BMS_2104",                "Extended command - BMS Battery information"          , b"2104"    , 38, cell_voltages       , ECU.ALL    , False),
-    'BMS_2105':                OBDCommand("BMS_2105",                "Extended command - BMS Battery information"          , b"2105"    , 45, bms_2105            , ECU.ALL    , False),
+    'BMS_2101':                OBDCommand("BMS_2101",                "Extended command - BMS Battery information"          , b"2101"    ,  0, bms_2101            , ECU.ALL    , False),  # length 61
+    'BMS_2102':                OBDCommand("BMS_2102",                "Extended command - BMS Battery information"          , b"2102"    ,  0, cell_voltages       , ECU.ALL    , False),  # length 38
+    'BMS_2103':                OBDCommand("BMS_2103",                "Extended command - BMS Battery information"          , b"2103"    ,  0, cell_voltages       , ECU.ALL    , False),  # length 38
+    'BMS_2104':                OBDCommand("BMS_2104",                "Extended command - BMS Battery information"          , b"2104"    ,  0, cell_voltages       , ECU.ALL    , False),  # length 38
+    'BMS_2105':                OBDCommand("BMS_2105",                "Extended command - BMS Battery information"          , b"2105"    ,  0, bms_2105            , ECU.ALL    , False),  # length 45
 
-    'ODOMETER_22B002':         OBDCommand("ODOMETER_22B002",         "Extended command - Odometer information"             , b"22b002"  , 15, odometer            , ECU.ALL    , False),
-    'VIN_1A80':                OBDCommand("VIN_1A80",                "Extended command - Vehicle Identification Number"    , b"1A80"    , 99, vin                 , ECU.ALL    , False),
-    'VMCU_2101':               OBDCommand("VMCU_2101",               "Extended command - VMCU information"                 , b"2101"    , 22, vmcu                , ECU.ALL    , False),
-    'TPMS_22C00B':             OBDCommand("TPMS_22C00B",             "Extended command - TPMS information"                 , b"22C00B"  , 23, tpms                , ECU.ALL    , False),
-    'EXT_TEMP_2180':           OBDCommand("EXT_TEMP_2180",           "Extended command - External temperature"             , b"2180"    , 25, external_temperature, ECU.ALL    , False)
+    'ODOMETER_22B002':         OBDCommand("ODOMETER_22B002",         "Extended command - Odometer information"             , b"22b002"  ,  0, odometer            , ECU.ALL    , False),  # length 15
+    'VIN_1A80':                OBDCommand("VIN_1A80",                "Extended command - Vehicle Identification Number"    , b"1A80"    ,  0, vin                 , ECU.ALL    , False),  # length 99
+    'VMCU_2101':               OBDCommand("VMCU_2101",               "Extended command - VMCU information"                 , b"2101"    ,  0, vmcu                , ECU.ALL    , False),  # length 22
+    'TPMS_22C00B':             OBDCommand("TPMS_22C00B",             "Extended command - TPMS information"                 , b"22C00B"  ,  0, tpms                , ECU.ALL    , False),  # length 23
+    'EXT_TEMP_2180':           OBDCommand("EXT_TEMP_2180",           "Extended command - External temperature"             , b"2180"    ,  0, external_temperature, ECU.ALL    , False)   # length 25
 }
