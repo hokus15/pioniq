@@ -53,7 +53,7 @@ def query_command(connection, command, max_attempts=3):
             cmd_response = connection.query(command, force=True)
         except Exception:
             exception = True
-        valid_response = not(cmd_response is None or cmd_response.value == "?" or cmd_response.value == "NO DATA" or cmd_response.value == "" or cmd_response.value is None or exception)
+        valid_response = not(cmd_response is None or cmd_response.is_null() or cmd_response.value is None or cmd_response.value == "?" or cmd_response.value == "" or exception)
         if not valid_response and command_count < max_attempts:
             logger.warning("No valid response for {}. Retrying in {} second(s)...".format(command, command_count))
             time.sleep(command_count)
@@ -151,11 +151,8 @@ def query_odometer_info(connection):
 
     # Only set odometer data if present.
     # Not available when car engine is off
-    if not odometer_resp.is_null():
-        odometer_info.update({'timestamp': int(round(odometer_resp.time))})
-        odometer_info.update(odometer_resp.value)
-    else:
-        logger.warning("Could not get odometer information")
+    odometer_info.update({'timestamp': int(round(odometer_resp.time))})
+    odometer_info.update(odometer_resp.value)
 
     # Return exception when empty dict
     if not bool(odometer_info):
@@ -175,18 +172,12 @@ def query_vmcu_info(connection):
     # VIN
     vin_resp = query_command(connection, ext_commands["VIN_1A80"])
     # Add vin to vmcu info
-    if not vin_resp.is_null():
-        vmcu_info.update(vin_resp.value)
-    else:
-        logger.warning("Could not get VIN")
+    vmcu_info.update(vin_resp.value)
 
     # VMCU
     vmcu_2101_resp = query_command(connection, ext_commands["VMCU_2101"])
-    if not vmcu_2101_resp.is_null():
-        vmcu_info.update({'timestamp': int(round(vmcu_2101_resp.time))})
-        vmcu_info.update(vmcu_2101_resp.value)
-    else:
-        logger.warning("Could not get VMCU information")
+    vmcu_info.update({'timestamp': int(round(vmcu_2101_resp.time))})
+    vmcu_info.update(vmcu_2101_resp.value)
 
     # Return exception when empty dict
     if not bool(vmcu_info):
@@ -205,11 +196,8 @@ def query_tpms_info(connection):
     # Query TPMS
     tpms_22c00b_resp = query_command(connection, ext_commands["TPMS_22C00B"])
 
-    if not tpms_22c00b_resp.is_null():
-        tpms_info.update({'timestamp': int(round(tpms_22c00b_resp.time))})
-        tpms_info.update(tpms_22c00b_resp.value)
-    else:
-        logger.warning("Could not get TPMS information")
+    tpms_info.update({'timestamp': int(round(tpms_22c00b_resp.time))})
+    tpms_info.update(tpms_22c00b_resp.value)
 
     # Return exception when empty dict
     if not bool(tpms_info):
@@ -229,11 +217,8 @@ def query_external_temperature_info(connection):
     ext_temp_resp = query_command(connection, ext_commands["EXT_TEMP_2180"])
 
     # Only set temperature data if present.
-    if not ext_temp_resp.is_null():
-        external_temperature_info.update({'timestamp': int(round(ext_temp_resp.time))})
-        external_temperature_info.update(ext_temp_resp.value)  # C
-    else:
-        logger.warning("Could not get external temperature information")
+    external_temperature_info.update({'timestamp': int(round(ext_temp_resp.time))})
+    external_temperature_info.update(ext_temp_resp.value)  # C
 
     # Return exception when empty dict
     if not bool(external_temperature_info):
