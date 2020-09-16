@@ -118,7 +118,7 @@ if __name__ == '__main__':
                     'last_update': int(round(time.time())),
                     'state': 'running'
                 }
-
+                location_fixed = False
                 # It may take some seconds to get good data
                 logger.debug("Latitude error (EPY): +/- {} m".format(gpsd.fix.epy))
                 logger.debug("Longitude error (EPX): +/- {} m".format(gpsd.fix.epx))
@@ -126,6 +126,7 @@ if __name__ == '__main__':
                 logger.info("Location accuracy: +/- {} m".format(fix_accuracy))
                 if fix_accuracy < max_accuracy:
                     logger.debug("GPS position fixed with +/- {} m".format(fix_accuracy))
+                    location_fixed = True
                     location.update({'latitude': gpsd.fix.latitude,
                                      'longitude': gpsd.fix.longitude,
                                      'gps_accuracy': fix_accuracy,
@@ -160,13 +161,14 @@ if __name__ == '__main__':
             except Exception as ex:
                 logger.exception("Unexpected error: {}".format(ex))
             finally:
-                result = mqtt_client.publish(topic=topic_prefix + "location", payload=json.dumps(location), qos=0, retain=True)
-                result.wait_for_publish()
-                if (result.rc == 0):
-                    logger.info("Message successfully published: " + str(result))
-                    published_messages += 1
-                else:
-                    logger.error("Error publishing message: " + str(result))
+                if location_fixed:
+                    result = mqtt_client.publish(topic=topic_prefix + "location", payload=json.dumps(location), qos=0, retain=True)
+                    result.wait_for_publish()
+                    if (result.rc == 0):
+                        logger.info("Message successfully published: " + str(result))
+                        published_messages += 1
+                    else:
+                        logger.error("Error publishing message: " + str(result))
 
                 logger.debug("Waiting {} seconds...".format(sleep_time))
                 time.sleep(sleep_time)
