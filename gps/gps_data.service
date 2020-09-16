@@ -1,5 +1,5 @@
 [Unit]
-Description=Publish GPS data to MQTT service
+Description=Publish GPS location data to MQTT broker
 Wants=gpsd.service
 Wants=network-online.target
 After=network-online.target
